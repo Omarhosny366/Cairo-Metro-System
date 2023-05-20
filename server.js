@@ -7,6 +7,7 @@ const publicApiRoutes = require('./routes/public/api');
 // const publicViewRoutes = require('./routes/public/views');
 // const privateViewRoutes = require('./routes/private/views');
 
+// hi hooda
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hjs');
