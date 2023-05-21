@@ -101,13 +101,13 @@ module.exports = function (app) {
  app.put("/api/v1/password/reset", async function (req, res) {
   const { newPassword } = req.body;
 
-  // Check if the new password is provided
+  
   if (!newPassword) {
     return res.status(400).send("New password is required");
   }
 
   try {
-    // Get the user from the session token
+    
     const sessionToken = req.cookies.session_token;
     const session = await db
       .select("userId")
@@ -124,7 +124,7 @@ module.exports = function (app) {
       return res.status(401).send("Invalid session");
     }
 
-    // Update the user's password in the database
+   
     await db("se_project.users")
       .where("id", session.userId)
       .update({ password: newPassword });
