@@ -4,10 +4,9 @@ const app = express();
 const authMiddleware = require('./middleware/auth');
 const privateApiRoutes = require('./routes/private/api');
 const publicApiRoutes = require('./routes/public/api');
-// const publicViewRoutes = require('./routes/public/views');
-// const privateViewRoutes = require('./routes/private/views');
+const publicViewRoutes = require('./routes/public/view');
+const privateViewRoutes = require('./routes/private/view');
 
-// hi hooda
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hjs');
@@ -18,6 +17,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
 // All public routes can be accessible without authentication
+
+// uncomment to view frontend
 // publicViewRoutes(app);
 publicApiRoutes(app);// uncomment
 
@@ -26,6 +27,8 @@ publicApiRoutes(app);// uncomment
  app.use(authMiddleware); // uncomment
 
 // The routes/views below can only be accessed if the user is authenticated
+
+// uncomment to view frontend
 // privateViewRoutes(app);
 privateApiRoutes(app);
 
