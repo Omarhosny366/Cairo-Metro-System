@@ -135,4 +135,24 @@ module.exports = function (app) {
     return res.status(500).send("Internal server error");
   }
 });
+app.post("/api/v1/station", async (req, res) => {
+  try {
+    const { id, stationname, stationtype, stationposition, stationstatus} =
+      req.body;
+    console.log(req.body);
+    let newstation = {
+      id,
+      stationname,
+      stationtype,
+      stationposition,
+      stationstatus
+    };
+    const addedstation = await db("stations").insert(addedstation).returning("*");
+    console.log(addedstation);
+    return res.status(201).json(addedstation);
+} catch (err) {
+    console.log("eror message", err.message);
+    return res.status(400).send(err.message);
+}
+});
 };
