@@ -8,9 +8,9 @@ const config = {
   client: 'pg',
   connection: {
     host: 'localhost',
-    port: 5433,
+    port: 5432,
     user: 'postgres',
-    password: '1234',
+    password: 'lolo2003',
     database: 'se_project',
   }
 };
