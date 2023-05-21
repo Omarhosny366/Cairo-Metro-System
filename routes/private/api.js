@@ -63,9 +63,10 @@ module.exports = function (app) {
         .select("userId")
         .from("se_project.sessions")
         .where("token", sessionToken)
-        .first();
-
-      if (!session) {
+        .first() 
+      
+           
+      if (!session ) {
         return res.status(401).send("Invalid session");
       }
 
@@ -90,8 +91,48 @@ module.exports = function (app) {
       console.log(e.message);
       return res.status(500).send("Internal server error");
     }
+ 
   });
 
-
+///////////////////////////////////////////////////////////////
+  ////////////////////////admin methods/////////////////////////
+  //////////////////////////////////////////////////////////////
   
+ app.put("/api/v1/password/reset", async function (req, res) {
+  const { newPassword } = req.body;
+
+  // Check if the new password is provided
+  if (!newPassword) {
+    return res.status(400).send("New password is required");
+  }
+
+  try {
+    // Get the user from the session token
+    const sessionToken = req.cookies.session_token;
+    const session = await db
+      .select("userId")
+      .from("se_project.sessions")
+      .where("token", sessionToken)
+      .first() 
+    
+    const adminRole = await db
+      .select("id")
+      .from("se_project.roles")
+      .where("role", "=", "admin");
+         
+    if (!session && !adminRole) {
+      return res.status(401).send("Invalid session");
+    }
+
+    // Update the user's password in the database
+    await db("se_project.users")
+      .where("id", session.userId)
+      .update({ password: newPassword });
+
+    return res.status(200).send("Password reset successful");
+  } catch (e) {
+    console.log(e.message);
+    return res.status(500).send("Internal server error");
+  }
+});
 };
