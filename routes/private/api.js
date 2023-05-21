@@ -80,6 +80,17 @@ module.exports = function (app) {
       return res.status(500).send("Internal server error");
     }
   });
+  app.get("/api/v1/zones", async function (req, res) {
+    try {
+      
+      const zones = await db.select("*").from("se_project.zones");
+
+      return res.status(200).json(zones);
+    } catch (e) {
+      console.log(e.message);
+      return res.status(500).send("Internal server error");
+    }
+  });
 
 
   
