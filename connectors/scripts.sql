@@ -1,6 +1,6 @@
 -- DROP TABLE IF EXISTS se_project.users;
 -- DROP TABLE IF EXISTS roles;
--- DROP TABLE IF EXISTS faculties;
+-- DROP TABLE IF EXISTS facultiesjana;
 -- DROP TABLE IF EXISTS courses;
 -- DROP TABLE IF EXISTS sessions;
 -- DROP TABLE IF EXISTS enrollments;
