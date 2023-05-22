@@ -9,3 +9,5 @@ INSERT INTO se_project.roles("role")
 UPDATE se_project.users
 	SET "roleId"=2
 	WHERE "email"='desoukya@gmail.com';
+
+insert into se_project.users(firstname,lastname,email,password,roleid) values('ali','shady','aslisdasd@dsds','213231',4)
