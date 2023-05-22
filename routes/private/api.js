@@ -98,7 +98,7 @@ module.exports = function (app) {
   ////////////////////////admin methods/////////////////////////
   //////////////////////////////////////////////////////////////
   
- app.put("/api/v1/password/reset", async function (req, res) {
+ app.put("/api/v1/password/resetAd", async function (req, res) {
   const { newPassword } = req.body;
 
   
