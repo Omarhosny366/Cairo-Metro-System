@@ -179,7 +179,7 @@ app.put("/api/v1/station/:stationId", async (req, res) => {
       return res.status(404).send("Station not found");
     }
 
-    // Update the station's name in the database
+    // Update the station's name in the database sd
     await db("stations")
       .where("id", stationId)
       .update({ stationname: stationName });
