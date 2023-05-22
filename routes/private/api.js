@@ -97,44 +97,6 @@ module.exports = function (app) {
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
   //////////////////////////////////////////////////////////////
-  
- app.put("/api/v1/password/reset", async function (req, res) {
-  const { newPassword } = req.body;
-
-  
-  if (!newPassword) {
-    return res.status(400).send("New password is required");
-  }
-
-  try {
-    
-    const sessionToken = req.cookies.session_token;
-    const session = await db
-      .select("userId")
-      .from("se_project.sessions")
-      .where("token", sessionToken)
-      .first() 
-    
-    const adminRole = await db
-      .select("id")
-      .from("se_project.roles")
-      .where("role", "=", "admin");
-         
-    if (!session && !adminRole) {
-      return res.status(401).send("Invalid session");
-    }
-
-   
-    await db("se_project.users")
-      .where("id", session.userId)
-      .update({ password: newPassword });
-
-    return res.status(200).send("Password reset successful");
-  } catch (e) {
-    console.log(e.message);
-    return res.status(500).send("Internal server error");
-  }
-});
 app.post("/api/v1/station", async (req, res) => {
   try {
     const { id, stationname, stationtype, stationposition, stationstatus} =
@@ -179,7 +141,7 @@ app.put("/api/v1/station/:stationId", async (req, res) => {
       return res.status(404).send("Station not found");
     }
 
-    // Update the station's name in the database sd
+    // Update the station's name in the database
     await db("stations")
       .where("id", stationId)
       .update({ stationname: stationName });
