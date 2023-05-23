@@ -270,5 +270,51 @@ app.post('/api/v1/payment/subscription', async (req, res) => {
       return res.status(400).send("Could not update employee");
   }
   });
-
+  
+  app.delete("/api/v1/station/:stationId", async function (req, res) {
+    try {
+      const { stationId } = req.params;
+  
+      // Check if the station exists
+      const existingStation = await db("se_project.stations")
+        .select("*")
+        .from("se_project.stations")
+        .where("id", stationId)
+        .first();
+  
+      if (!existingStation) {
+        return res.status(404).send("Station not found");
+      }
+  
+      // Delete the station from the database
+      const deletedStation = await db("se_project.stations")
+        .where("id", stationId)
+        .del()
+        .returning("*");
+  
+      const routeId= await db.select("*").from("se_project.routes")
+      .where("fromStationid", routes.fromStationid)
+      .where("toStationid", routes.toStationid).returning("*");
+      
+      // Delete routes associated with the station
+      const deletedRoutes = await db("se_project.routes")
+        .where("fromStationid", routes.fromStationid)
+        .where("toStationid", routes.toStationid)
+        .del()
+        .returning("*");
+  
+      
+       const delStationRoute =await db("se_project.stationRoutes")
+       .where("routeid",routeId).del().returning("*");
+    
+  
+      return res.status(200).json({
+        deletedStation,
+        deletedRoutes
+      });
+    } catch (e) {
+      console.log(e.message);
+      return res.status(400).send("Internal server error");
+    }
+  });
 };
