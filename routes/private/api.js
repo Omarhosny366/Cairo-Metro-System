@@ -86,12 +86,66 @@ module.exports = function (app) {
       
       const zones = await db.select("*").from("se_project.zones");
 
-      return res.status(200).json(zones);
+      return res.status(200).send(zones);
+    } catch (e) {
+      console.log(e.message);
+      return res.status(400).send("Internal server error");
+    }
+ 
+  });
+
+  app.put("/api/v1/payment/ticket", async function (req, res) {
+    try {
+      // Retrieve ticket details from the request body
+      const { purchasedId, creditCardNumber, holderName, payedAmount, origin, destination, tripDate } = req.body;
+
+      // Check if the user has a subscription
+      const userSubscriptions = await db
+        .select("*")
+        .from("se_project.subsription")
+        .where("userId", req.user.id); // Assuming user authentication and retrieving the user ID from the request
+
+      let ticketPrice;
+      let transferStations;
+
+      if (userSubscriptions.length > 0) {
+        // User has a subscription
+        // Perform necessary logic to determine ticket price and transfer stations based on the subscription and route
+        ticketPrice = 0; // Replace with your actual logic
+        transferStations = []; // Replace with your actual logic
+      } else {
+        
+        ticketPrice = 0; // Replace with your actual logic
+        transferStations = []; // Replace with your actual logic
+      }
+
+     
+      const newTicket = {
+        origin,
+        destination,
+        userId: req.user.id,
+        subID: null, // Assuming the user doesn't have a subscription
+        tripDate,
+      };
+      const ticket = await db("se_project.tickets").insert(newTicket).returning("*");
+
+      const newTransaction = {
+        amount: req.body.payedAmount,
+        userId: req.user.id,
+        purchasedid:req.body.purchasedId
+      };
+      await db("se_project.transactions").insert(newTransaction);
+
+      const response = {
+        ticket,
+        ticketPrice,
+        transferStations,
+      };
+      return res.status(200).json(response);
     } catch (e) {
       console.log(e.message);
       return res.status(500).send("Internal server error");
     }
- 
   });
 
   const { Pool } = require('pg');
@@ -173,62 +227,81 @@ app.post('/api/v1/payment/subscription', async (req, res) => {
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
   //////////////////////////////////////////////////////////////
-  
- app.put("/api/v1/password/reset", async function (req, res) {
-  const { newPassword } = req.body;
+  app.post("/api/v1/station", async function (req, res)   {
 
-  
-  if (!newPassword) {
-    return res.status(400).send("New password is required");
+    const stationexists = await db
+    .select("*")
+    .from("se_project.stations")
+    .where("stationname", req.body.stationName);
+  if (!isEmpty(stationexists)) {
+    return res.status(400).send("station exists");
   }
-
+  const newStation ={
+    stationname:req.body.stationName,
+    stationtype :req.body.stationType,
+    stationposition :req.body.stationPosition,
+    stationstatus :req.body.stationStatus
+  };
+    try {
+      const addedStation = await db("se_project.stations")
+        .insert(newStation)
+        .returning("*");
+      return res.status(200).json(addedStation);
+    } 
+    catch (e) {
+      console.log("error message", e.message);
+      return res.status(400).send(err.message);
+    }
+  });
+app.put("/api/v1/station/:stationId", async (req, res) => {
   try {
-    
-    const sessionToken = req.cookies.session_token;
-    const session = await db
-      .select("userId")
-      .from("se_project.sessions")
-      .where("token", sessionToken)
-      .first() 
-    
-    const adminRole = await db
-      .select("id")
-      .from("se_project.roles")
-      .where("role", "=", "admin");
-         
-    if (!session && !adminRole) {
-      return res.status(401).send("Invalid session");
+    const { stationId } = req.params;
+    const { stationName } = req.body;
+
+    // Validate input
+    if (!stationId) {
+      return res.status(400).send("Station ID is required");
+    }
+    if (!stationName) {
+      return res.status(400).send("Station name is required");
     }
 
-   
-    await db("se_project.users")
-      .where("id", session.userId)
-      .update({ password: newPassword });
+    // Check if the station exists in the database
+    const existingStation = await db
+      .select("*")
+      .from("stations")
+      .where("id", stationId)
+      .first();
+      
+    if (!existingStation) {
+      return res.status(404).send("Station not found");
+    }
 
-    return res.status(200).send("Password reset successful");
-  } catch (e) {
-    console.log(e.message);
+    // Update the station's name in the database
+    await db("stations")
+      .where("id", stationId)
+      .update({ stationname: stationName });
+
+    return res.status(200).send("Station updated successfully");
+  } catch (err) {
+    console.log("Error message:", err.message);
     return res.status(500).send("Internal server error");
   }
 });
-app.post("/api/v1/station", async (req, res) => {
+app.put("/api/v1/station/:stationId", async (req, res) => {
   try {
-    const { id, stationname, stationtype, stationposition, stationstatus} =
-      req.body;
-    console.log(req.body);
-    let newstation = {
-      id,
-      stationname,
-      stationtype,
-      stationposition,
-      stationstatus
-    };
-    const addedstation = await db("stations").insert(addedstation).returning("*");
-    console.log(addedstation);
-    return res.status(201).json(addedstation);
-} catch (err) {
+    const { id } = req.params;
+    const { stationname } = req.body;
+    
+    const updatedstation = await
+     db.query("UPDATE se_project.stations SET stationname =$1 WHERE id =$2",
+     [stationname,id]);
+  
+     
+      res.json("haha");
+  } catch (err) {
     console.log("eror message", err.message);
-    return res.status(400).send(err.message);
+    return res.status(400).send("Could not update employee");
 }
 });
 };
