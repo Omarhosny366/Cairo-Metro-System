@@ -1,5 +1,5 @@
 {
-  "name": "SE_PROJECT",
+  "name": "se_project",
   "scripts": {
     "start": "nodemon server.js"
   },
