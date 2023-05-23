@@ -253,55 +253,22 @@ app.post('/api/v1/payment/subscription', async (req, res) => {
       return res.status(400).send(err.message);
     }
   });
-app.put("/api/v1/station/:stationId", async (req, res) => {
-  try {
-    const { stationId } = req.params;
-    const { stationName } = req.body;
-
-    // Validate input
-    if (!stationId) {
-      return res.status(400).send("Station ID is required");
-    }
-    if (!stationName) {
-      return res.status(400).send("Station name is required");
-    }
-
-    // Check if the station exists in the database
-    const existingStation = await db
-      .select("*")
-      .from("stations")
-      .where("id", stationId)
-      .first();
-      
-    if (!existingStation) {
-      return res.status(404).send("Station not found");
-    }
-
-    // Update the station's name in the database
-    await db("stations")
-      .where("id", stationId)
-      .update({ stationname: stationName });
-
-    return res.status(200).send("Station updated successfully");
-  } catch (err) {
-    console.log("Error message:", err.message);
-    return res.status(500).send("Internal server error");
+  app.put("/api/v1/station/:stationId", async (req, res) => {
+    try {
+      const { stationname } = req.body;
+      const { stationId } = req.params;
+      const updatedStation = await db("se_project.stations")
+        .where("id", stationId)
+        .update({
+          stationname: stationname,
+          
+        })
+        .returning("*");
+        return res.status(200).json(updatedStation);
+    } catch (err) {
+      console.log("eror message", err.message);
+      return res.status(400).send("Could not update employee");
   }
-});
-app.put("/api/v1/station/:stationId", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { stationname } = req.body;
-    
-    const updatedstation = await
-     db.query("UPDATE se_project.stations SET stationname =$1 WHERE id =$2",
-     [stationname,id]);
-  
-     
-      res.json("haha");
-  } catch (err) {
-    console.log("eror message", err.message);
-    return res.status(400).send("Could not update employee");
-}
-});
+  });
+
 };

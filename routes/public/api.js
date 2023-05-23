@@ -32,12 +32,12 @@ app.post("/api/v1/user", async function (req, res) {
   });
 
   // Register HTTP endpoint to create new user
-  app.post("/api/v1/user/login", async function (req, res) {
-    // get users credentials from the JSON body
+  app.post("/api/v1/user/login", async (req, res) => {
     const { email, password } = req.body;
+  
     if (!email) {
       // If the email is not present, return an HTTP unauthorized code
-      return res.status(400).send("email is required");
+      return res.status(400).send("Email is required");
     }
     if (!password) {
       // If the password is not present, return an HTTP unauthorized code
@@ -71,16 +71,44 @@ app.post("/api/v1/user", async function (req, res) {
       expiresat,
     };
     try {
+      const user = await db
+        .select("*")
+        .from("se_project.users")
+        .where("email", email)
+        .first();
+  
+      if (isEmpty(user)) {
+        return res.status(400).send("User does not exist");
+      }
+  
+      if (user.password !== password) {
+        return res.status(401).send("Password does not match");
+      }
+  
+      // Set the expiry time as 15 minutes after the current time
+      const token = v4();
+      const currentDateTime = new Date();
+      const expiresAt = new Date(+currentDateTime + 900000); // Expire in 15 minutes
+  
+      // Create a session containing information about the user and expiry time
+      const session = {
+        userid: user.id,
+        token,
+        expiresat: expiresAt,
+      };
+  
       await db("se_project.sessions").insert(session);
-      // In the response, set a cookie on the client with the name "session_cookie"
+  
+      // In the response, set a cookie on the client with the name "session_token"
       // and the value as the UUID we generated. We also set the expiration time.
       return res
-        .cookie("session_token", token, { expires: expiresat })
+        .cookie("session_token", token, { expires: expiresAt })
         .status(200)
-        .send("login successful");
-    } catch (e) {
-      console.log(e.message);
-      return res.status(400).send("Could not register user");
+        .send("Login successful");
+    } catch (err) {
+      console.log(err.message);
+      return res.status(400).send("Could not login");
     }
   });
+  
 }
