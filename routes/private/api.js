@@ -86,14 +86,68 @@ module.exports = function (app) {
       
       const zones = await db.select("*").from("se_project.zones");
 
-      return res.status(200).json(zones);
+      return res.status(200).send(zones);
+    } catch (e) {
+      console.log(e.message);
+      return res.status(400).send("Internal server error");
+    }
+ 
+  });
+
+  app.put("/api/v1/payment/ticket", async function (req, res) {
+    try {
+      // Retrieve ticket details from the request body
+      const { purchasedId, creditCardNumber, holderName, payedAmount, origin, destination, tripDate } = req.body;
+
+      // Check if the user has a subscription
+      const userSubscriptions = await db
+        .select("*")
+        .from("se_project.subsription")
+        .where("userId", req.user.id); // Assuming user authentication and retrieving the user ID from the request
+
+      let ticketPrice;
+      let transferStations;
+
+      if (userSubscriptions.length > 0) {
+        // User has a subscription
+        // Perform necessary logic to determine ticket price and transfer stations based on the subscription and route
+        ticketPrice = 0; // Replace with your actual logic
+        transferStations = []; // Replace with your actual logic
+      } else {
+        
+        ticketPrice = 0; // Replace with your actual logic
+        transferStations = []; // Replace with your actual logic
+      }
+
+     
+      const newTicket = {
+        origin,
+        destination,
+        userId: req.user.id,
+        subID: null, // Assuming the user doesn't have a subscription
+        tripDate,
+      };
+      const ticket = await db("se_project.tickets").insert(newTicket).returning("*");
+
+      const newTransaction = {
+        amount: req.body.payedAmount,
+        userId: req.user.id,
+        purchasedid:req.body.purchasedId
+      };
+      await db("se_project.transactions").insert(newTransaction);
+
+      const response = {
+        ticket,
+        ticketPrice,
+        transferStations,
+      };
+      return res.status(200).json(response);
     } catch (e) {
       console.log(e.message);
       return res.status(500).send("Internal server error");
     }
- 
   });
-  
+
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
   //////////////////////////////////////////////////////////////
