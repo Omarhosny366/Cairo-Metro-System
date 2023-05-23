@@ -93,30 +93,36 @@ module.exports = function (app) {
     }
  
   });
-
+  
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
   //////////////////////////////////////////////////////////////
-app.post("/api/v1/station", async (req, res) => {
-  try {
-    const { id, stationname, stationtype, stationposition, stationstatus} =
-      req.body;
-    console.log(req.body);
-    let newstation = {
-      id,
-      stationname,
-      stationtype,
-      stationposition,
-      stationstatus
-    };
-    const addedstation = await db("stations").insert(addedstation).returning("*");
-    console.log(addedstation);
-    return res.status(201).json(addedstation);
-} catch (err) {
-    console.log("eror message", err.message);
-    return res.status(400).send(err.message);
-}
-});
+  app.post("/api/v1/station", async function (req, res)   {
+
+    const stationexists = await db
+    .select("*")
+    .from("se_project.stations")
+    .where("stationname", req.body.stationName);
+  if (!isEmpty(stationexists)) {
+    return res.status(400).send("station exists");
+  }
+  const newStation ={
+    stationname:req.body.stationName,
+    stationtype :req.body.stationType,
+    stationposition :req.body.stationPosition,
+    stationstatus :req.body.stationStatus
+  };
+    try {
+      const addedStation = await db("se_project.stations")
+        .insert(newStation)
+        .returning("*");
+      return res.status(200).json(addedStation);
+    } 
+    catch (e) {
+      console.log("error message", e.message);
+      return res.status(400).send(err.message);
+    }
+  });
 app.put("/api/v1/station/:stationId", async (req, res) => {
   try {
     const { stationId } = req.params;
@@ -151,5 +157,21 @@ app.put("/api/v1/station/:stationId", async (req, res) => {
     console.log("Error message:", err.message);
     return res.status(500).send("Internal server error");
   }
+});
+app.put("/api/v1/station/:stationId", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { stationname } = req.body;
+    
+    const updatedstation = await
+     db.query("UPDATE se_project.stations SET stationname =$1 WHERE id =$2",
+     [stationname,id]);
+  
+     
+      res.json("haha");
+  } catch (err) {
+    console.log("eror message", err.message);
+    return res.status(400).send("Could not update employee");
+}
 });
 };
