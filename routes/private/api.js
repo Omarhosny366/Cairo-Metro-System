@@ -154,20 +154,21 @@ module.exports = function (app) {
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
   //////////////////////////////////////////////////////////////
+  
   app.post("/api/v1/station", async function (req, res)   {
 
     const stationexists = await db
     .select("*")
     .from("se_project.stations")
-    .where("stationname", req.body.stationName);
+    .where("stationname", req.body.stationname);
   if (!isEmpty(stationexists)) {
-    return res.status(400).send("station exists");
+    return res.status(400).send("station exists")
   }
   const newStation ={
-    stationname:req.body.stationName,
-    stationtype :req.body.stationType,
-    stationposition :req.body.stationPosition,
-    stationstatus :req.body.stationStatus
+    stationname:req.body.stationname,
+    stationtype :req.body.stationtype,
+    stationposition :req.body.stationposition,
+    stationstatus :req.body.stationstatus
   };
     try {
       const addedStation = await db("se_project.stations")
@@ -180,6 +181,7 @@ module.exports = function (app) {
       return res.status(400).send(err.message);
     }
   });
+  
   app.put("/api/v1/station/:stationId", async (req, res) => {
     try {
       const { stationname } = req.body;
@@ -194,8 +196,57 @@ module.exports = function (app) {
         return res.status(200).json(updatedStation);
     } catch (err) {
       console.log("eror message", err.message);
-      return res.status(400).send("Could not update employee");
+      return res.status(400).send("Could not update Stations");
   }
   });
-
+  app.delete("/api/v1/station/:stationId", async (req, res) => {
+    try {
+      const { stationId } = req.params;
+  
+      // Step 1: Find routes where the given station is either the 'fromStationId' or 'toStationId'
+      const dependentRoutes = await db("se_project.routes")
+        .where({ fromStationid: stationId })
+        .orWhere({ toStationid: stationId });
+  
+      // Step 2: Create new arrays for 'fromStationid' and 'toStationid'
+      const fromStationIds = [];
+      const toStationIds = [];
+  
+      // Step 3: Iterate through dependentRoutes and add 'fromStationid' and 'toStationid' to respective arrays
+      dependentRoutes.forEach((route) => {
+        if (route.fromStationid === stationId) {
+          toStationIds.push(route.toStationid);
+        } else {
+          fromStationIds.push(route.fromStationid);
+        }
+      });
+  
+      // Step 4: Create new dependencies and routes array
+      const newDependencies = [];
+      const newRoutes = [];
+  
+      // Step 5: Iterate through fromStationIds and combine with toStationIds to create new dependencies and routes
+      fromStationIds.forEach((fromId) => {
+        toStationIds.forEach((toId) => {
+          newDependencies.push({ fromStationid: fromId, toStationid: toId });
+          newRoutes.push({ routename: `Route from ${fromId} to ${toId}`, fromStationid: fromId, toStationid: toId });
+        });
+      });
+  
+      // Step 6: Insert new dependencies into the 'stationRoutes' table
+      await db("se_project.stationRoutes").insert(newDependencies);
+  
+      // Step 7: Insert new routes into the 'routes' table
+      await db("se_project.routes").insert(newRoutes);
+  
+      // Step 8: Delete the station with the given stationId
+      await db("se_project.stations").where("id", stationId).del();
+  
+      return res.status(200).json({ message: "Station deleted successfully" });
+    } catch (err) {
+      console.log("error message", err.message);
+      return res.status(400).send("Could not delete station");
+    }
+  });
+  
 };
