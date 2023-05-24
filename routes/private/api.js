@@ -58,12 +58,12 @@ module.exports = function (app) {
 
     try {
       // Get the user from the session token
-      const sessionToken = req.cookies.session_token;
+     const sessionToken = req.cookies.session_token;
       const session = await db
         .select("userId")
         .from("se_project.sessions")
         .where("token", sessionToken)
-        .first() 
+        .first()  
       
            
       if (!session ) {
@@ -93,6 +93,62 @@ module.exports = function (app) {
     }
  
   });
+ 
+  app.post('/api/v1/payment/subscription', async (req, res) => {
+    const { purchasedId, creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+  
+    let noOfTickets;
+    if (subType === 'annual') {
+      noOfTickets = 100;
+    } else if (subType === 'quarterly') {
+      noOfTickets = 50;
+    } else if (subType === 'monthly') {
+      noOfTickets = 10;
+    } else {
+      return res.status(400).json({ error: 'Invalid subscription type' });
+    }
+  
+    try {
+      const sessionToken = req.cookies.session_token;
+      const session = await db
+        .select("userid")
+        .from("se_project.sessions")
+        .where("token", sessionToken)
+        .first()  
+      
+           
+      if (!session ) {
+        return res.status(401).send("Invalid session");
+      }
+
+
+
+      const newTransaction = {
+        purchasedIid: purchasedId,
+        userid: session,
+        amount: payedAmount,
+      };
+  
+      // Insert the transaction into the transactions table
+      await db('se_project.transactions').insert(newTransaction);
+  
+      const newSubscription = {
+        subtype: subType,
+        zoneid: zoneId,
+        userid: session,
+        nooftickets: noOfTickets,
+      };
+  
+      // Insert the subscription into the subscription table
+      await db('se_project.subscription').insert(newSubscription);
+  
+      return res.status(200).json({ message: 'Subscription purchased successfully', noOfTickets });
+    } catch (error) {
+      console.error('Error inserting transaction or subscription:', error);
+      return res.status(500).json({ error: 'Failed to process the payment' });
+    }
+  });
+  
 
   app.put("/api/v1/payment/ticket", async function (req, res) {
     try {
@@ -147,6 +203,12 @@ module.exports = function (app) {
       return res.status(500).send("Internal server error");
     }
   });
+      
+
+
+
+
+
 
   
   
