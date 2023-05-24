@@ -272,5 +272,54 @@ app.post('/api/v1/payment/subscription', async (req, res) => {
       return res.status(400).send("Could not update Stations");
   }
   });
-
+  app.delete("/api/v1/station/:stationId", async (req, res) => {
+    try {
+      const { stationId } = req.params;
+  
+      // Step 1: Find routes where the given station is either the 'fromStationId' or 'toStationId'
+      const dependentRoutes = await db("se_project.routes")
+        .where({ fromStationid: stationId })
+        .orWhere({ toStationid: stationId });
+  
+      // Step 2: Create new arrays for 'fromStationid' and 'toStationid'
+      const fromStationIds = [];
+      const toStationIds = [];
+  
+      // Step 3: Iterate through dependentRoutes and add 'fromStationid' and 'toStationid' to respective arrays
+      dependentRoutes.forEach((route) => {
+        if (route.fromStationid === stationId) {
+          toStationIds.push(route.toStationid);
+        } else {
+          fromStationIds.push(route.fromStationid);
+        }
+      });
+  
+      // Step 4: Create new dependencies and routes array
+      const newDependencies = [];
+      const newRoutes = [];
+  
+      // Step 5: Iterate through fromStationIds and combine with toStationIds to create new dependencies and routes
+      fromStationIds.forEach((fromId) => {
+        toStationIds.forEach((toId) => {
+          newDependencies.push({ fromStationid: fromId, toStationid: toId });
+          newRoutes.push({ routename: `Route from ${fromId} to ${toId}`, fromStationid: fromId, toStationid: toId });
+        });
+      });
+  
+      // Step 6: Insert new dependencies into the 'stationRoutes' table
+      await db("se_project.stationRoutes").insert(newDependencies);
+  
+      // Step 7: Insert new routes into the 'routes' table
+      await db("se_project.routes").insert(newRoutes);
+  
+      // Step 8: Delete the station with the given stationId
+      await db("se_project.stations").where("id", stationId).del();
+  
+      return res.status(200).json({ message: "Station deleted successfully" });
+    } catch (err) {
+      console.log("error message", err.message);
+      return res.status(400).send("Could not delete station");
+    }
+  });
+  
 };
