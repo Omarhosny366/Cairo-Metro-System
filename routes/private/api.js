@@ -148,81 +148,8 @@ module.exports = function (app) {
     }
   });
 
-  const { Pool } = require('pg');
-const pool = new Pool({
-  connectionString: 'your-database-connection-string',
-});
-
-app.post('/api/v1/payment/subscription', async (req, res) => {
-  const purchasedId = req.body.purchasedId;
-  const creditCardNumber = req.body.creditCardNumber;
-  const holderName = req.body.holderName;
-  const payedAmount = req.body.payedAmount;
-  const subType = req.body.subType;
-  const zoneId = req.body.zoneId;
-
-  try {
-    // Perform necessary operations to process the payment
-    const paymentRequest = {
-      purchasedId: purchasedId,
-      creditCardNumber: creditCardNumber,
-      holderName: holderName,
-      amount: payedAmount,
-      // Additional payment request parameters if needed
-    };
-
-    // Send the payment request to the payment gateway or payment service provider
-    const paymentResponse = await paymentGateway.processPayment(paymentRequest);
-
-    if (paymentResponse.success) {
-      // Payment successful
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-
-        // Store the transaction details in the database (e.g., using the 'transactions' table)
-        const transactionData = {
-          amount: payedAmount,
-          userid: req.user.id,
-          purchasedIid: purchasedId,
-        };
-        const transactionResult = await client.query(
-          'INSERT INTO se_project.transactions (amount, userid, purchasedIid) VALUES ($1, $2, $3) RETURNING id',
-          [transactionData.amount, transactionData.userid, transactionData.purchasedIid]
-        );
-        const transactionId = transactionResult.rows[0].id;
-
-        // Store the subscription details in the database (e.g., using the 'subscription' table)
-        const subscriptionData = {
-          subtype: subType,
-          zoneid: zoneId,
-          userid: req.user.id,
-          nooftickets: 0, // Assuming initial number of tickets is 0, adjust as needed
-        };
-        await client.query(
-          'INSERT INTO se_project.subscription (subtype, zoneid, userid, nooftickets) VALUES ($1, $2, $3, $4)',
-          [subscriptionData.subtype, subscriptionData.zoneid, subscriptionData.userid, subscriptionData.nooftickets]
-        );
-
-        await client.query('COMMIT');
-
-        // Return a response indicating successful payment
-        res.status(200).json({ message: 'Payment for subscription successful.' });
-      } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-      } finally {
-        client.release();
-      }
-    } else {
-      // Payment failed
-      res.status(400).json({ message: 'Payment for subscription failed.' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'An error occurred during payment processing.' });
-  }
-});
-
+  
+  
 
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////

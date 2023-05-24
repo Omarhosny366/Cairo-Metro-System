@@ -85,6 +85,56 @@ app.post("/api/v1/user", async function (req, res) {
     }
   });
   
-
+  app.post("/api/v1/payment/subscription", async (req, res) => {
+    const { purchasedId, creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+  
+    if (!purchasedId || !creditCardNumber || !holderName || !payedAmount || !subType || !zoneId) {
+      return res.status(400).send("All fields are required");
+    }
+  
+    // Determine the number of tickets based on subscription type
+    let ticketCount;
+    if (subType === "annual") {
+      ticketCount = 100;
+    } else if (subType === "quarterly") {
+      ticketCount = 50;
+    } else if (subType === "monthly") {
+      ticketCount = 10;
+    } else {
+      return res.status(400).send("Invalid subscription type");
+    }
+  
+    try {
+      // Perform the online payment process here (e.g., call a payment gateway API)
+  
+      // Assuming the payment is successful, generate a unique purchase ID
+      const uniquePurchaseId = generateUniquePurchaseId();
+  
+      // Save the purchase details in the subscription table
+      const subscription = {
+        subtype: subType,
+        zoneid: zoneId,
+        userid: req.user.id,
+        nooftickets: ticketCount
+      };
+  
+      const insertedSubscription = await db("se_project.subscription").insert(subscription).returning("*");
+  
+      // Save the transaction details in the transactions table
+      const transaction = {
+        amount: payedAmount,
+        userid: req.user.id,
+        purchasedIid: uniquePurchaseId
+      };
+  
+      await db("se_project.transactions").insert(transaction);
+  
+      return res.status(200).send("Subscription purchase successful");
+    } catch (err) {
+      console.log(err.message);
+      return res.status(400).send("Could not process the subscription purchase");
+    }
+  });
+  
   
 }
