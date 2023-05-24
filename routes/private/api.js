@@ -227,20 +227,21 @@ app.post('/api/v1/payment/subscription', async (req, res) => {
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
   //////////////////////////////////////////////////////////////
+  
   app.post("/api/v1/station", async function (req, res)   {
 
     const stationexists = await db
     .select("*")
     .from("se_project.stations")
-    .where("stationname", req.body.stationName);
+    .where("stationname", req.body.stationname);
   if (!isEmpty(stationexists)) {
-    return res.status(400).send("station exists");
+    return res.status(400).send("station exists")
   }
   const newStation ={
-    stationname:req.body.stationName,
-    stationtype :req.body.stationType,
-    stationposition :req.body.stationPosition,
-    stationstatus :req.body.stationStatus
+    stationname:req.body.stationname,
+    stationtype :req.body.stationtype,
+    stationposition :req.body.stationposition,
+    stationstatus :req.body.stationstatus
   };
     try {
       const addedStation = await db("se_project.stations")
@@ -253,6 +254,7 @@ app.post('/api/v1/payment/subscription', async (req, res) => {
       return res.status(400).send(err.message);
     }
   });
+  
   app.put("/api/v1/station/:stationId", async (req, res) => {
     try {
       const { stationname } = req.body;
@@ -267,54 +269,8 @@ app.post('/api/v1/payment/subscription', async (req, res) => {
         return res.status(200).json(updatedStation);
     } catch (err) {
       console.log("eror message", err.message);
-      return res.status(400).send("Could not update employee");
+      return res.status(400).send("Could not update Stations");
   }
   });
-  
-  app.delete("/api/v1/station/:stationId", async function (req, res) {
-    try {
-      const { stationId } = req.params;
-  
-      // Check if the station exists
-      const existingStation = await db("se_project.stations")
-        .select("*")
-        .from("se_project.stations")
-        .where("id", stationId)
-        .first();
-  
-      if (!existingStation) {
-        return res.status(404).send("Station not found");
-      }
-  
-      // Delete the station from the database
-      const deletedStation = await db("se_project.stations")
-        .where("id", stationId)
-        .del()
-        .returning("*");
-  
-      const routeId= await db.select("*").from("se_project.routes")
-      .where("fromStationid", routes.fromStationid)
-      .where("toStationid", routes.toStationid).returning("*");
-      
-      // Delete routes associated with the station
-      const deletedRoutes = await db("se_project.routes")
-        .where("fromStationid", routes.fromStationid)
-        .where("toStationid", routes.toStationid)
-        .del()
-        .returning("*");
-  
-      
-       const delStationRoute =await db("se_project.stationRoutes")
-       .where("routeid",routeId).del().returning("*");
-    
-  
-      return res.status(200).json({
-        deletedStation,
-        deletedRoutes
-      });
-    } catch (e) {
-      console.log(e.message);
-      return res.status(400).send("Internal server error");
-    }
-  });
+
 };
