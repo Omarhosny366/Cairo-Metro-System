@@ -93,7 +93,7 @@ module.exports = function (app) {
     }
  
   });
- 
+ /*
   app.post('/api/v1/payment/subscription', async (req, res) => {
     const { purchasedId, creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
   
@@ -149,6 +149,62 @@ module.exports = function (app) {
     }
   });
   
+*/
+app.post("/api/v1/payment/subscription", async function (req, res)  {
+  const { purchasedId, creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+
+  let nooftickets;
+  if (subtype === 'annual') {
+    nooftickets = 100;
+  } else if (subtype === 'quarterly') {
+    nooftickets = 50;
+  } else if (subtype === 'monthly') {
+    nooftickets = 10;
+  } else {
+    return res.status(400).json({ error: 'Invalid subscription type' });
+  }
+
+  try {
+    const sessionToken = req.cookies.session_token;
+    const session = await db
+      .select("userid")
+      .from("se_project.sessions")
+      .where("token", sessionToken)
+      .first()  
+    
+         
+    if (!session ) {
+      return res.status(401).send("Invalid session");
+    }
+
+
+
+    const newTransaction = {
+      purchasedid: purchasedid,
+      userid: session,
+      amount: amount,
+    };
+
+    // Insert the transaction into the transactions table
+    const newTran = await db('se_project.transactions').insert(newTransaction).returning("*");
+
+    const newSubscription = {
+      subtype: subtype,
+      zoneid: zoneid,
+      userid: session,
+      nooftickets: nooftickets,
+    };
+
+    // Insert the subscription into the subscription table
+    const newsub = await db('se_project.subscription')
+    .insert(newSubscription).returning("*");
+
+    return res.status(200).json({ message: 'Subscription purchased successfully', nooftickets });
+  } catch (error) {
+    console.error('Error inserting transaction or subscription:', error);
+    return res.status(500).json({ error: 'Failed to process the payment' });
+  }
+});
 
   app.put("/api/v1/payment/ticket", async function (req, res) {
     try {
