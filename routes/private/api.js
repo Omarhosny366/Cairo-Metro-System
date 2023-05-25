@@ -310,7 +310,9 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
       if (!subscription) {
         return res.status(400).json({ error: "Invalid subscription ID or user does not have a subscription." });
       }
-  
+      if (subscription.nooftickets === 0) {
+        return res.status(400).json({ error: "No available tickets in the subscription." });
+      }
       ///////////////write method check price here////////////////
       const ticketPrice =Math.floor(Math.random() * 91) + 10;
       ;
@@ -324,13 +326,73 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
           tripdate: tripDate,
         })
         .returning("*");
-  
-      return res.status(200).json({ ticketPrice, ticket });
+        const ticketNumber = await db("se_project.subsription")
+        .select("nooftickets")
+        .where("id", subId)
+        .first();
+
+      const newTicketNumber = parseInt(ticketNumber.nooftickets - 1);
+
+      const updatedTicketNumber = await db("se_project.subsription")
+        .where("id", subId)
+        .update({
+          nooftickets: newTicketNumber
+        })
+        .returning("*");      
+      return res.status(200).json({ ticketPrice, ticket,newTicketNumber });
     } catch (err) {
       console.log("error message", err.message);
       return res.status(500).send("Internal server error.");
     }
   });
+  
+  app.put("/api/v1/ride/simulate", async (req, res) => {
+    try {
+      const { origin, destination, tripDate } = req.body;
+      const userId = 2; ///////write user session here//////
+  
+      const originStation = await db("se_project.stations")
+        .where("stationname", origin)
+        .first();
+      const destinationStation = await db("se_project.stations")
+        .where("stationname", destination)
+        .first();
+  
+      if (!originStation || !destinationStation) {
+        return res.status(400).json({ error: "Invalid origin or destination" });
+      }
+  
+ 
+      const ticket = await db("se_project.tickets")
+        .select("id")
+        .where("userid", userId)///////write user session here//////
+        .first();
+  
+      if (!ticket) {
+        return res.status(400).json({ error: "No ticket found for the user" });
+      }
+  
+      const ticketId = ticket.id;
+  
+     
+      const ride = await db("se_project.rides")
+        .insert({
+          status: "completed",
+          origin: origin,
+          destination: destination,
+          userid: userId,///////write user session here//////
+          ticketid: ticketId,
+          tripdate: tripDate,
+        })
+        .returning("*");
+  
+      return res.status(200).json(ride);
+    } catch (err) {
+      console.log("Error:", err);
+      return res.status(500).json({ error: "Failed to simulate ride" });
+    }
+  });
+  
 
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
