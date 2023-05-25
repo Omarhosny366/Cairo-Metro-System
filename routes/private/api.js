@@ -147,6 +147,93 @@ module.exports = function (app) {
       return res.status(500).json({ error: 'Failed to process the payment' });
     }
   });
+
+  app.post("/api/v1/payment/ticket", async function (req, res) {
+    try {
+      const session_token = getSessionToken(req);
+      const session = await db
+        .select("*")
+        .from("se_project.sessions")
+        .where("token", session_token)
+        .first();
+  
+      if (!session) {
+        return res.status(401).send("Invalid session");
+      }
+      const {
+        purchasedId,
+        creditCardNumber,
+        holderName,
+        payedAmount,
+        Origin,
+        Destination,
+        tripDate,
+      } = req.body;
+  
+      // Check if all required fields are provided
+      if (
+        purchasedId === undefined ||
+        creditCardNumber === undefined ||
+        holderName === undefined ||
+        payedAmount === undefined ||
+        Origin === undefined ||
+        Destination === undefined ||
+        tripDate === undefined
+      ) {
+        return res.status(400).send("All fields are required");
+      }
+      const currentDateTime = new Date();
+      const ticketDateTime = new Date(tripDate);
+      if (ticketDateTime <= currentDateTime) {
+        return res.status(400).send("date is exits");
+      }
+      
+      
+        
+      
+  
+      // Insert the ticket into the tickets table
+      const [ticketId] = await db("se_project.tickets").insert({
+        userid: session.userid,
+        subid: null,
+        origin: Origin,
+        destination: Destination,
+        tripdate: tripDate,
+      }).returning("id");
+      
+
+      
+      //const tickerId=await db .select("id").from("se_project.tickets")
+      //.where("id",ticket.id)
+      
+  
+      // Update the ride table with the new ticket information
+       await db("se_project.rides").insert({
+        status:"pending",
+        origin: Origin,
+        destination: Destination,
+        userid: session.userid,
+        ticketid:ticketId,
+        tripdate:tripDate
+ 
+
+      });
+      await db("se_project.transactions").insert({
+        amount:payedAmount,
+        userid:session.userid,
+        purchasediid:purchasedId,
+
+      });
+  
+      return res
+        .status(200)
+        .send(`Ticket purchased successfully. Ticket ID: ${ticketId}`);
+    } catch (e) {
+      console.log(e.message);
+      return res.status(500).send("Failed to purchase ticket");
+    }
+  });
+  
   
 app.put("/api/v1/refund/:ticketId", async function (req, res) {
  const t_id =parseInt(req.params.ticketId);
