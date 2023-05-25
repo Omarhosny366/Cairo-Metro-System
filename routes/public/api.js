@@ -24,6 +24,7 @@ app.post("/api/v1/user", async function (req, res) {
     try {
       const user = await db("se_project.users").insert(newUser).returning("*");
 
+
       return res.status(200).json(user );
     } catch (e) {
       console.log(e.message);
@@ -66,9 +67,9 @@ app.post("/api/v1/user", async function (req, res) {
   
       // Create a session containing information about the user and expiry time
       const session = {
-        userid: user.id,
+        userid:user.id,
         token,
-        expiresat: expiresAt,
+        expiresat:expiresAt,
       };
   
       await db("se_project.sessions").insert(session);
@@ -84,7 +85,4 @@ app.post("/api/v1/user", async function (req, res) {
       return res.status(400).send("Could not login");
     }
   });
-  
-
-  
 }
