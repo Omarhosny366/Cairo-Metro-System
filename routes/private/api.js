@@ -224,77 +224,79 @@ app.post('/api/v1/payment/subscription', async (req, res) => {
   }
 });
 app.put("/api/v1/refund/:ticketId", async function (req, res) {
-  const ticketId = req.params.ticketId;
-
+ const t_id =parseInt(req.params.ticketId);
   try {
-    // Retrieve the ticket from the database
-    const ticket = await db("se_project.tickets")
-      .where("id", ticketId)
-      .first();
+    const session_token = getSessionToken(req);
+    const session = await db
+    .select("*")
+    .from("se_project.sessions")
+    .where("token", session_token)
+    .first();
 
-    // Check if the ticket exists
+    const ticket = await db
+    .from("se_project.tickets").select("*")
+    .where("id", t_id);
+
+   
+
+     //Check if the ticket exists
     if (!ticket) {
       return res.status(404).send("Ticket not found");
     }
 
     // Check if the ticket is for a future ride
     const currentDateTime = new Date();
-    const ticketDateTime = new Date(ticket.tripDate);
+    const ticketDateTime = new Date(ticket.tripdate);
     if (ticketDateTime <= currentDateTime) {
       return res.status(400).send("Cannot refund past or current dated tickets");
     }
+    const ticketPrice =Math.floor(Math.random() * 91) + 10;
 
     // Retrieve the user's subscription from the subscription table
-    const userSubscription = await db("se_project.subscriptions")
-      .where("userid", ticket.userid)
-      .first();
+    const userSubscription = await db.select("*").from("se_project.subcsription")
+      .where("userid",session.userid)
+     .first();
 
     // Check if the user has a subscription
     if (userSubscription) {
       // Check if there is a ticket associated with the user ID and subscription ID
-      const associatedTicket = await db("se_project.tickets")
-        .where("userid", ticket.userId)
-        .where("subid", userSubscription.id)
-        .first();
+      const associatedTicket = await db.select("*").from("se_project.tickets")
+        .where("userid", session.userid)
+        .where("subid", userSubscription.id);
+        
 
       if (associatedTicket) {
         // Refund the ticket by updating the transaction status
         await db("se_project.refund_requests").insert({
-          ticketid: ticketId,
-          status: "pending",
-          userid:ticket.userid,
+          ticketid: t_id,
+          status:"pending",
+          userid:session.userid,
+          refundamount:ticketPrice
           
         });
 
         return res.status(200).send("Ticket refund requested");
       }
     }else{
-      const onlineticket = await db("se_project.tickets")
-      .where("userid", ticket.userId)
+      const onlineticket = await db.select("*").from("se_project.tickets")
+      .where("userid", session.userid)
       .first();
        if(onlineticket){
         await db("se_project.refund_requests").insert({
-          ticketid: ticketId,
+          ticketid:t_id,
           status: "pending",
-          userid:ticket.userid,
+          userid:session.userid,
           
         });
         return res.status(200).send("Ticket refund requested");
        }
-
-
-
     }
-      
-    
-
     return res.status(400).send("Cannot refund ticket without a valid subscription");
   } catch (e) {
     console.log(e.message);
-    return res.status(500).send("Failed to refund ticket");
+    return res.status(500).send("Failed to refund ticket" );
   }
 });
-
 
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
