@@ -402,4 +402,50 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
       return res.status(400).send("Could not update senior");
   }
   });
+  
+  app.put("/api/v1/zones/:zoneId", async (req, res) => {
+    try {
+      const  Price  = parseInt(req.body.Price); 
+      const { zoneId } = req.params;
+
+    const updatedZone = await db("se_project.zones")
+      .where("id", zoneId)
+      .update({
+        price: Price,
+
+      })
+      .returning("*");
+      return res.status(200).json(updatedZone);
+  } catch (err) {
+    console.log("eror message", err.message);
+    return res.status(400).send("Could not update zone price");
+}
+});
+
+app.post("/api/v1/route", async function (req, res) {
+  try {
+    const fromStationId = req.body.Fromstationid;
+    const toStationId = req.body.Tostationid;
+    const routeName = req.body.routename;
+
+    const existingStations = await db("se_project.stations").where("id", fromStationId);
+    const existingStations2 = await db("se_project.stations").where("id", toStationId);
+
+    if (!existingStations || !existingStations2) {
+      return res.status(400).send("Re-enter station IDs");
+    } else {
+      const newRoute = await db("se_project.routes")
+        .insert({
+          fromstationid: fromStationId,
+          tostationid: toStationId,
+          routename: routeName,
+        }).returning("*");
+
+      return res.status(200).json(newRoute);
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(400).send("Could not create route");
+  }
+});
 };
