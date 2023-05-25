@@ -342,6 +342,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
     try {
       const  {reqStatus } = req.body;
       const { requestId } = req.params;
+     
       const updatedstatus = await db("se_project.refund_requests")
         .where("id", requestId)
         .update({
@@ -349,9 +350,56 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
         })
         .returning("*");
         return res.status(200).json(updatedstatus);
+      
     } catch (err) {
       console.log("eror message", err.message);
       return res.status(400).send("Could not update refund status");
+  }
+  });
+  
+  app.put("/api/v1/requests/senior/:requestId", async (req, res) => {
+    try {
+        const {seniorStatus} = req.body;
+        const {requestId} = req.params;
+        const {userid}=await db("se_project.senior_requests")
+        .select("userid")
+        .where("id", requestId).first();
+        const row = await db("se_project.roles")
+        .where("role", "=", "senior")
+        .first();
+        const roleId = row.id;
+        const row2 = await db("se_project.roles")
+        .where("role", "=", "user")
+        .first();
+        const roleID = row2.id;
+        
+        const updatedSenior = await db("se_project.senior_requests")
+          .where("id", requestId)
+          .update( {
+            status : seniorStatus
+          })
+          .returning("*");
+          if(seniorStatus==="accepted"){
+            const aa = await db("se_project.users")
+            .where("id", userid)
+            .update( {
+              roleid : roleId
+            })
+            .returning("*");
+          }
+          else{
+            const aa = await db("se_project.users")
+            .where("id", userid)
+            .update( {
+              roleid : roleID
+            })
+            .returning("*");
+          }
+         return res.status(200).json(updatedSenior);    
+    
+    } catch (err) {
+      console.log("eror message", err.message);
+      return res.status(400).send("Could not update senior");
   }
   });
 };
