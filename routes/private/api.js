@@ -6,7 +6,7 @@ const {getSessionToken}=require('../../utils/session')
 const getUser = async function (req) {
   const sessionToken = getSessionToken(req);
   if (!sessionToken) {
-    return res.status(301).redirect("/"); //Might be issue
+    return res.status(301).redirect("/");
   }
   console.log("hi",sessionToken);
   const user = await db
@@ -15,20 +15,21 @@ const getUser = async function (req) {
     .where("token", sessionToken)
     .innerJoin(
       "se_project.users",
-      "se_project.sessions.userId",
+      "se_project.sessions.userid",
       "se_project.users.id"
     )
     .innerJoin(
       "se_project.roles",
-      "se_project.users.roleId",
+      "se_project.users.roleid",
       "se_project.roles.id"
     )
    .first();
 
   console.log("user =>", user);
-  user.isNormal = user.roleId === roles.user;
-  user.isAdmin = user.roleId === roles.admin;
-  user.isSenior = user.roleId === roles.senior;
+  user.isNormal = user.roleid === roles.user;
+  user.isAdmin = user.roleid === roles.admin;
+  user.isSenior = user.roleid === roles.senior;
+  console.log("user =>", user)
   return user;
 };
 
@@ -57,23 +58,23 @@ module.exports = function (app) {
     }
 
     try {
-      // Get the user from the session token
-      const sessionToken = req.cookies.session_token;
-      const session = await db
-        .select("userId")
-        .from("se_project.sessions")
-        .where("token", sessionToken)
-        .first() 
-      
-           
-      if (!session ) {
-        return res.status(401).send("Invalid session");
-      }
+       //Get the user from the session token
+     
+       const session_token = getSessionToken(req);
+    const session = await db
+      .select("*")
+      .from("se_project.sessions")
+      .where("token", session_token)
+      .first();
 
-      // Update the user's password in the database
-      await db("se_project.users")
-        .where("id", session.userId)
-        .update({ password: newPassword });
+    if (!session) {
+      return res.status(401).send("Invalid session");
+    }
+
+    // Update the user's password in the database
+    await db("se_project.users")
+      .where("id", session.userid)
+      .update({ password: newPassword });
 
       return res.status(200).send("Password reset successful");
     } catch (e) {
@@ -93,133 +94,129 @@ module.exports = function (app) {
     }
  
   });
+ 
 
-  app.put("/api/v1/payment/ticket", async function (req, res) {
+  app.post("/api/v1/payment/subscription", async function (req, res) {
+    const { purchasedId, creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
+  
+    let noOfTickets;
+    if (subType === 'annual') {
+      noOfTickets = 100;
+    } else if (subType === 'quarterly') {
+      noOfTickets = 50;
+    } else if (subType === 'monthly') {
+      noOfTickets = 10;
+    } else {
+      return res.status(400).json({ error: 'Invalid subscription type' });
+    }
+  
     try {
-      // Retrieve ticket details from the request body
-      const { purchasedId, creditCardNumber, holderName, payedAmount, origin, destination, tripDate } = req.body;
-
-      // Check if the user has a subscription
-      const userSubscriptions = await db
+      const session_token = getSessionToken(req);
+      const session = await db
         .select("*")
-        .from("se_project.subsription")
-        .where("userId", req.user.id); // Assuming user authentication and retrieving the user ID from the request
-
-      let ticketPrice;
-      let transferStations;
-
-      if (userSubscriptions.length > 0) {
-        // User has a subscription
-        // Perform necessary logic to determine ticket price and transfer stations based on the subscription and route
-        ticketPrice = 0; // Replace with your actual logic
-        transferStations = []; // Replace with your actual logic
-      } else {
-        
-        ticketPrice = 0; // Replace with your actual logic
-        transferStations = []; // Replace with your actual logic
+        .from("se_project.sessions")
+        .where("token", session_token)
+        .first();  
+      
+      if (!session) {
+        return res.status(401).send("Invalid session");
       }
-
-     
-      const newTicket = {
-        origin,
-        destination,
-        userId: req.user.id,
-        subID: null, // Assuming the user doesn't have a subscription
-        tripDate,
-      };
-      const ticket = await db("se_project.tickets").insert(newTicket).returning("*");
-
+  
       const newTransaction = {
-        amount: req.body.payedAmount,
-        userId: req.user.id,
-        purchasedid:req.body.purchasedId
+        purchasedid: purchasedId,
+        userid: session.userid,
+        amount: payedAmount,
       };
-      await db("se_project.transactions").insert(newTransaction);
-
-      const response = {
-        ticket,
-        ticketPrice,
-        transferStations,
+  
+      // Insert the transaction into the transactions table
+      const newTran = await db('se_project.transactions').insert(newTransaction).returning("*");
+  
+      const newSubscription = {
+        subtype: subType,
+        zoneid: zoneId,
+        userid: session.userid,
+        nooftickets: noOfTickets,
       };
-      return res.status(200).json(response);
-    } catch (e) {
-      console.log(e.message);
-      return res.status(500).send("Internal server error");
+  
+      // Insert the subscription into the subscription table
+      const newSub = await db('se_project.subscription').insert(newSubscription).returning("*");
+  
+      return res.status(200).json({ message: 'Subscription purchased successfully', nooftickets: noOfTickets });
+    } catch (error) {
+      console.error('Error inserting transaction or subscription:', error);
+      return res.status(500).json({ error: 'Failed to process the payment' });
     }
   });
-
-  const { Pool } = require('pg');
-const pool = new Pool({
-  connectionString: 'your-database-connection-string',
-});
-
-app.post('/api/v1/payment/subscription', async (req, res) => {
-  const purchasedId = req.body.purchasedId;
-  const creditCardNumber = req.body.creditCardNumber;
-  const holderName = req.body.holderName;
-  const payedAmount = req.body.payedAmount;
-  const subType = req.body.subType;
-  const zoneId = req.body.zoneId;
+  
+app.put("/api/v1/refund/:ticketId", async function (req, res) {
+  const ticketId = req.params.ticketId;
 
   try {
-    // Perform necessary operations to process the payment
-    const paymentRequest = {
-      purchasedId: purchasedId,
-      creditCardNumber: creditCardNumber,
-      holderName: holderName,
-      amount: payedAmount,
-      // Additional payment request parameters if needed
-    };
+    // Retrieve the ticket from the database
+    const ticket = await db("se_project.tickets")
+      .where("id", ticketId)
+      .first();
 
-    // Send the payment request to the payment gateway or payment service provider
-    const paymentResponse = await paymentGateway.processPayment(paymentRequest);
-
-    if (paymentResponse.success) {
-      // Payment successful
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-
-        // Store the transaction details in the database (e.g., using the 'transactions' table)
-        const transactionData = {
-          amount: payedAmount,
-          userid: req.user.id,
-          purchasedIid: purchasedId,
-        };
-        const transactionResult = await client.query(
-          'INSERT INTO se_project.transactions (amount, userid, purchasedIid) VALUES ($1, $2, $3) RETURNING id',
-          [transactionData.amount, transactionData.userid, transactionData.purchasedIid]
-        );
-        const transactionId = transactionResult.rows[0].id;
-
-        // Store the subscription details in the database (e.g., using the 'subscription' table)
-        const subscriptionData = {
-          subtype: subType,
-          zoneid: zoneId,
-          userid: req.user.id,
-          nooftickets: 0, // Assuming initial number of tickets is 0, adjust as needed
-        };
-        await client.query(
-          'INSERT INTO se_project.subscription (subtype, zoneid, userid, nooftickets) VALUES ($1, $2, $3, $4)',
-          [subscriptionData.subtype, subscriptionData.zoneid, subscriptionData.userid, subscriptionData.nooftickets]
-        );
-
-        await client.query('COMMIT');
-
-        // Return a response indicating successful payment
-        res.status(200).json({ message: 'Payment for subscription successful.' });
-      } catch (error) {
-        await client.query('ROLLBACK');
-        throw error;
-      } finally {
-        client.release();
-      }
-    } else {
-      // Payment failed
-      res.status(400).json({ message: 'Payment for subscription failed.' });
+    // Check if the ticket exists
+    if (!ticket) {
+      return res.status(404).send("Ticket not found");
     }
-  } catch (error) {
-    res.status(500).json({ message: 'An error occurred during payment processing.' });
+
+    // Check if the ticket is for a future ride
+    const currentDateTime = new Date();
+    const ticketDateTime = new Date(ticket.tripDate);
+    if (ticketDateTime <= currentDateTime) {
+      return res.status(400).send("Cannot refund past or current dated tickets");
+    }
+
+    // Retrieve the user's subscription from the subscription table
+    const userSubscription = await db("se_project.subscriptions")
+      .where("userid", ticket.userid)
+      .first();
+
+    // Check if the user has a subscription
+    if (userSubscription) {
+      // Check if there is a ticket associated with the user ID and subscription ID
+      const associatedTicket = await db("se_project.tickets")
+        .where("userid", ticket.userId)
+        .where("subid", userSubscription.id)
+        .first();
+
+      if (associatedTicket) {
+        // Refund the ticket by updating the transaction status
+        await db("se_project.refund_requests").insert({
+          ticketid: ticketId,
+          status: "pending",
+          userid:ticket.userid,
+          
+        });
+
+        return res.status(200).send("Ticket refund requested");
+      }
+    }else{
+      const onlineticket = await db("se_project.tickets")
+      .where("userid", ticket.userId)
+      .first();
+       if(onlineticket){
+        await db("se_project.refund_requests").insert({
+          ticketid: ticketId,
+          status: "pending",
+          userid:ticket.userid,
+          
+        });
+        return res.status(200).send("Ticket refund requested");
+       }
+
+
+
+    }
+      
+    
+
+    return res.status(400).send("Cannot refund ticket without a valid subscription");
+  } catch (e) {
+    console.log(e.message);
+    return res.status(500).send("Failed to refund ticket");
   }
 });
 
