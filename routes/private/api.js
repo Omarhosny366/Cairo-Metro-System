@@ -272,54 +272,89 @@ app.post('/api/v1/payment/subscription', async (req, res) => {
       return res.status(400).send("Could not update Stations");
   }
   });
-  app.delete("/api/v1/station/:stationId", async (req, res) => {
+  
+  
+  app.put("/api/v1/route/:routeId", async (req, res) => {
     try {
-      const { stationId } = req.params;
-  
-      // Step 1: Find routes where the given station is either the 'fromStationId' or 'toStationId'
-      const dependentRoutes = await db("se_project.routes")
-        .where({ fromStationid: stationId })
-        .orWhere({ toStationid: stationId });
-  
-      // Step 2: Create new arrays for 'fromStationid' and 'toStationid'
-      const fromStationIds = [];
-      const toStationIds = [];
-  
-      // Step 3: Iterate through dependentRoutes and add 'fromStationid' and 'toStationid' to respective arrays
-      dependentRoutes.forEach((route) => {
-        if (route.fromStationid === stationId) {
-          toStationIds.push(route.toStationid);
-        } else {
-          fromStationIds.push(route.fromStationid);
-        }
-      });
-  
-      // Step 4: Create new dependencies and routes array
-      const newDependencies = [];
-      const newRoutes = [];
-  
-      // Step 5: Iterate through fromStationIds and combine with toStationIds to create new dependencies and routes
-      fromStationIds.forEach((fromId) => {
-        toStationIds.forEach((toId) => {
-          newDependencies.push({ fromStationid: fromId, toStationid: toId });
-          newRoutes.push({ routename: `Route from ${fromId} to ${toId}`, fromStationid: fromId, toStationid: toId });
-        });
-      });
-  
-      // Step 6: Insert new dependencies into the 'stationRoutes' table
-      await db("se_project.stationRoutes").insert(newDependencies);
-  
-      // Step 7: Insert new routes into the 'routes' table
-      await db("se_project.routes").insert(newRoutes);
-  
-      // Step 8: Delete the station with the given stationId
-      await db("se_project.stations").where("id", stationId).del();
-  
-      return res.status(200).json({ message: "Station deleted successfully" });
+      const { routename } = req.body;
+      const { routeId } = req.params;
+      const updatedroutes = await db("se_project.routes")
+        .where("id", routeId)
+        .update({
+          routename: routename,
+          
+        })
+        .returning("*");
+        return res.status(200).json(updatedroutes);
     } catch (err) {
-      console.log("error message", err.message);
-      return res.status(400).send("Could not delete station");
+      console.log("eror message", err.message);
+      return res.status(400).send("Could not update routes");
+  }
+  });
+  
+  
+  app.delete("/api/v1/route/:routeId", async (req, res) => {
+    try {
+      const routeId = parseInt(req.params.routeId);
+  
+      const route = await db("se_project.routes").where("id", routeId).first();
+      if (!route) {
+        return res.status(404).json({ error: "Route not found" });
+      }
+  
+      const { fromstationid, tostationid } = route;
+  
+      const fromStationRoutes = await db("se_project.routes")
+      .select("fromstationid")
+      .where("id", routeId);
+      const toStationRoutes = await db("se_project.routes")
+      .select("tostationid")
+      .where("id", routeId);
+      if (fromStationRoutes.length !=0 && toStationRoutes.length !=0 ) {
+        await db("se_project.stations").where("id", fromstationid).update({
+          stationstatus: "new",
+          stationposition: "start",
+        });
+        await db("se_project.stations").where("id", tostationid).update({
+          stationstatus: "new",
+          stationposition: "end",
+        });
+      } else if (fromStationRoutes.length != 0) {
+        await db("se_project.stations").where("id", fromstationid).update({
+          stationstatus: "new",
+          stationposition: "start",
+        });
+      } else if (toStationRoutes.length !=0) {
+        await db("se_project.stations").where("id", tostationid).update({
+          stationstatus: "new",
+          stationposition: "end",
+        });
+      }
+  
+      await db("se_project.routes").where("id", routeId).del();
+  
+      return res.status(200).json({ message: "Route deleted successfully" });
+    } catch (err) {
+      console.log("Error:", err);
+      return res.status(400).json({ error: "Could not delete route" });
     }
   });
   
+  
+  app.put("/api/v1/requests/refunds/:requestId", async (req, res) => {
+    try {
+      const  {reqStatus } = req.body;
+      const { requestId } = req.params;
+      const updatedstatus = await db("se_project.refund_requests")
+        .where("id", requestId)
+        .update({
+          status : reqStatus
+        })
+        .returning("*");
+        return res.status(200).json(updatedstatus);
+    } catch (err) {
+      console.log("eror message", err.message);
+      return res.status(400).send("Could not update refund status");
+  }
+  });
 };
