@@ -294,6 +294,40 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
   });
   
 
+  app.post("/api/v1/tickets/purchase/subscription", async (req, res) => {
+    try {
+      const { subId, origin, destination,tripDate} = req.body;
+  
+    
+      const subscription = await db("se_project.subsription")
+        .where("id", subId)
+        .andWhere("userid", 2) ///////write user session here//////
+        .first();
+  
+      if (!subscription) {
+        return res.status(400).json({ error: "Invalid subscription ID or user does not have a subscription." });
+      }
+  
+      ///////////////write method check price here////////////////
+      const ticketPrice =Math.floor(Math.random() * 91) + 10;
+      ;
+  
+      const ticket = await db("se_project.tickets")
+        .insert({
+          origin: origin,
+          destination: destination,
+          userid: 2,///////write user session here//////
+          subid: subId,
+          tripdate: tripDate,
+        })
+        .returning("*");
+  
+      return res.status(200).json({ ticketPrice, ticket });
+    } catch (err) {
+      console.log("error message", err.message);
+      return res.status(500).send("Internal server error.");
+    }
+  });
 
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
@@ -436,7 +470,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
         const {seniorStatus} = req.body;
         const {requestId} = req.params;
         const {userid}=await db("se_project.senior_requests")
-        .select("userid")
+        .select("userid") 
         .where("id", requestId).first();
         const row = await db("se_project.roles")
         .where("role", "=", "senior")
