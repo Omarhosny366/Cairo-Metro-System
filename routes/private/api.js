@@ -220,6 +220,80 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
   }
 });
 
+  //Check Price
+  app.get("/api/v1/tickets/price/:originId&:destinationId", async (req, res) => {
+    const originId = req.params.originId;
+    const destinationId = req.params.destinationId;
+  
+    try {
+      // Fetch the origin station details
+      const originStation = await db
+        .select("*")
+        .from("se_project.stations")
+        .where("id", originId)
+        .first();
+  
+      // Fetch the destination station details
+      const destinationStation = await db
+        .select("*")
+        .from("se_project.stations")
+        .where("id", destinationId)
+        .first();
+  
+      if (!originStation || !destinationStation) {
+        return res.status(400).send("Invalid origin or destination station");
+      }
+  
+      // Fetch all routes that include the origin station
+      const routes = await db
+        .select("se_project.routes.*")
+        .from("se_project.routes")
+        .join("se_project.stationroutes", "se_project.routes.id", "=", "se_project.stationroutes.routeid")
+        .where("se_project.stationroutes.stationid", originId);
+  
+      let totalPrice = 0;
+      let visitedStations = [originId];
+  
+      // Recursive function to calculate the price by traversing the routes
+      const calculatePrice = (currentStationId) => {
+        for (const route of routes) {
+          if (route.fromstationid === currentStationId) {
+            // Add the price of the current route to the total price
+            totalPrice += 50;
+  
+            // Add the destination station ID to the visited stations array
+            visitedStations.push(route.tostationid);
+  
+            if (route.toStationid === destinationId) {
+              // Reached the destination, return the total price
+              return totalPrice;
+            } else {
+              // Continue recursively to the next station in the route
+              const nextStationId = route.tostationid;
+              return calculatePrice(nextStationId);
+            }
+          }
+        }
+  
+        // No route found from the current station to the destination
+        return null;
+      };
+  
+      const finalPrice = calculatePrice(originId);
+  
+      if (finalPrice === null) {
+        return res.status(400).send("No route found from the origin to the destination");
+      }
+  
+      // Return the final price and visited stations array as the response
+      return res.status(200).json({ price: finalPrice, visitedStations });
+    } catch (err) {
+      console.log(err.message);
+      return res.status(400).send("Error occurred while calculating the price");
+    }
+  });
+  
+
 
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
