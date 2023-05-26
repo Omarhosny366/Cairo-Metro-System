@@ -601,26 +601,96 @@ catch(error) {
     }
   });
   
-  
   app.put("/api/v1/requests/refunds/:requestId", async (req, res) => {
     try {
-      const  {reqStatus } = req.body;
+      const { reqStatus } = req.body;
       const { requestId } = req.params;
-     
-      const updatedstatus = await db("se_project.refund_requests")
+  
+      const [refundRequest] = await db("se_project.refund_requests")
+        .where("id", requestId)
+        .returning("*");
+  
+      
+  
+      const [userId] = await db("se_project.refund_requests")
+        .select("userid")
+        .where("id", requestId);
+  
+      
+  
+      const [refundAmount] = await db("se_project.refund_requests")
+        .select("refundamount")
+        .where("id", requestId);
+  
+      
+  
+      const [transaction] = await db("se_project.transactions")
+        .select("*")
+        .where("userid", userId.userid);
+  
+      
+      const [ticket] = await db("se_project.tickets")
+        .select("*")
+        .where("id", refundRequest.ticketid);
+  
+      
+  
+      if (reqStatus === "accepted") {
+        
+
+        if (!ticket.subid) {
+        
+        const [userIdd] = await db("se_project.refund_requests")
+        .select("userid")
+        .where("id", requestId);
+       
+       
+        const [transactionn] = await db("se_project.transactions")
+        .select("*")
+        .where("userid", userIdd.userid);
+       
+        const newamount = transactionn.amount - refundAmount.refundamount;
+       
+          const updatedTransaction = await db("se_project.transactions")
+            .where("userid", userIdd.userid)
+            .update({
+              amount: newamount
+            })
+            .returning("*");
+  
+         
+        } else {
+          const [subscription] = await db("se_project.subsription")
+            .where("id", ticket.subid)
+            .select("*");
+  
+          const updatedSubscription = await db("se_project.subsription")
+            .where("id", ticket.subid)
+            .update({
+              nooftickets: subscription.nooftickets + 1
+            })
+            .returning("*");
+  
+          
+        }
+      }
+  
+      const updatedStatus = await db("se_project.refund_requests")
         .where("id", requestId)
         .update({
-          status : reqStatus
+          status: reqStatus
         })
         .returning("*");
-        return res.status(200).json(updatedstatus);
-      
-    } catch (err) {
-      console.log("eror message", err.message);
-      return res.status(400).send("Could not update refund status");
-  }
-  });
   
+      
+  
+      return res.status(200).json(updatedStatus);
+    } catch (err) {
+      console.log("Error message:", err.message);
+      return res.status(400).send("Could not update refund status");
+    }
+  });
+    
   app.put("/api/v1/requests/senior/:requestId", async (req, res) => {
     try {
         const {seniorStatus} = req.body;
@@ -666,4 +736,23 @@ catch(error) {
       return res.status(400).send("Could not update senior");
   }
   });
+  app.put("/api/v1/zones/:zoneId", async (req, res) => {
+    try {
+      const { zoneId } = req.params;
+      const { price } = req.body;
+  
+      const updatedZone = await db("se_project.zones")
+        .where("id", zoneId)
+        .update({
+          price: price
+        })
+        .returning("*");
+  
+      return res.status(200).json(updatedZone);
+    } catch (err) {
+      console.log("Error message:", err.message);
+      return res.status(400).send("Could not update zone price");
+    }
+  });
+  
 };
