@@ -224,6 +224,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
 });
 
   //Check Price
+  /*
   app.get("/api/v1/tickets/price/:originId&:destinationId", async (req, res) => {
     const originId = req.params.originId;
     const destinationId = req.params.destinationId;
@@ -296,7 +297,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
     }
   });
   
-
+*/
   app.post("/api/v1/tickets/purchase/subscription", async (req, res) => {
     try {
       const { subId, origin, destination,tripDate} = req.body;

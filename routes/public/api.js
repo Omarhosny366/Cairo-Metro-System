@@ -85,6 +85,74 @@ app.post("/api/v1/user", async function (req, res) {
       return res.status(400).send("Could not login");
     }
   });
-
+  
+  app.post("/api/v1/tickets/price/:originId/:destinationId", async (req, res) => {
+    try {
+      const { originId, destinationId } = req.params;
+      const visitedStations = []; // Add the visited stations to this array
+  
+      const originStation = await db("se_project.stations")
+        .where("id", originId)
+        .first();
+        
+      const destinationStation = await db("se_project.stations")
+        .where("id", destinationId)
+        .first();
+  
+      if (!originStation || !destinationStation) {
+        return res.status(400).json({ error: "Invalid origin or destination" });
+      }
+      
+      const route = await db("se_project.routes")
+        .where("fromstationid", originId)
+        .andWhere("tostationid", destinationId)
+        .first();
+  
+      if (!route) {
+        return res.status(400).json({ error: "No route found between the stations" });
+      }
+  
+      const stationRoutes = await db("se_project.routes")
+        .where("routeid", route.id)
+        .orderBy("id");
+  
+      let totalCost = 0;
+      let previousStationId = originId;
+  
+      for (const stationRoute of stationRoutes) {
+        const [station] = await db("se_project.stations")
+          .where("id", stationRoute.stationid).returning("*");
+  
+        if (!station) {
+          return res.status(400).json({ error: "Invalid station" });
+        }
+        
+        visitedStations.push(station.stationname);
+        
+        if (stationRoute.stationid === destinationId) {
+          break; // Reached the destination, stop calculating cost
+        }
+  
+        const zone = await db("se_project.zones").select("*")
+          .where("zonetype", station.stationtype).returning("price");
+  
+        if (!zone) {
+          return res.status(400).json({ error: "No zone found for the station" });
+        }
+  
+        totalCost += zone;
+        previousStationId = stationRoute.stationid;
+      }
+console.log(visitedStations);
+      const numVisitedStations = visitedStations.length - 1; // Exclude the origin station from the count
+      const ticketPrice = numVisitedStations * totalCost;
+  
+      return res.status(200).json({ ticketPrice, visitedStations });
+    } catch (err) {
+      console.log("Error:", err);
+      return res.status(500).json({ error: "Failed to check ticket price" });
+    }
+  });
+  
   
 }
