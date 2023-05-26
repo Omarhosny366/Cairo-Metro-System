@@ -315,8 +315,8 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
 
   //Check Price
   app.get("/api/v1/tickets/price/:originId&:destinationId", async (req, res) => {
-    const originId = req.params.originId;
-    const destinationId = req.params.destinationId;
+    const originId = parseInt(req.params.originId);
+    const destinationId = parseInt(req.params.destinationId);
   
     try {
       // Fetch the origin station details
@@ -341,10 +341,12 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
   
       let totalPrice = 0;
       let currentStationId = originId;
+      let iterationCount = 0;
+      const maxIterations = 100; // Set a maximum number of iterations limit
   
-      while (currentStationId !== destinationId) {
+      while (currentStationId != destinationId ) {
         const route = await db
-          .select("se_project.routes.*")
+          .select("*")
           .from("se_project.routes")
           .join("se_project.stationroutes", "se_project.routes.id", "=", "se_project.stationroutes.routeid")
           .where("se_project.routes.fromstationid", currentStationId)
@@ -359,6 +361,11 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
   
         totalPrice += 50;
         currentStationId = route.tostationid;
+        iterationCount++;
+      }
+  
+      if (iterationCount === maxIterations) {
+        return res.status(400).send("Maximum iteration limit reached");
       }
   
       return res.status(200).json({ price: totalPrice, visitedStations });
@@ -367,7 +374,6 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
       return res.status(400).send("Error occurred while calculating the price");
     }
   });
-  
 
   app.post("/api/v1/tickets/purchase/subscription", async (req, res) => {
     try {
