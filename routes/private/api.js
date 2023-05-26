@@ -274,7 +274,59 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
       return res.status(400).send("Error occurred while calculating the price");
     }
   });
+
+  app.post("/api/v1/senior/request", async (req, res) => {
+    const { nationalid } = req.body;
+//check nationalid
+  if (!nationalid) {
+    return res.status(400).send("National ID is required");
+  }
+//get user id from the current session
+try{
+  const session_token =  sessionToken(req);
+const session = await db
+  .select("*")
+  .from("se_project.sessions")
+  .where("token", session_token)
+  .first();
+
+if(!session)
+  return res.status(401).send("Invalid session");
   
+//get the user based on the provided nationalId
+ const user = await db
+  .select("*")
+  .from("se_project.senior_requests")
+  .where("nationalid", nationalid)
+  .first();
+
+if (!user) {
+  return res.status(400).send("User not found");
+}
+//create senior request
+const seniorRequest = {
+  status: "Pending",
+  userid: user.id,
+  nationalid: nationalid,
+};
+
+await db("se_project.senior_requests").insert(seniorRequest);
+
+return res.status(200).send("Senior request submitted");
+}
+catch(error) {
+  console.error(error);
+  return res.status(500).send("Error processing the request");
+
+}
+//insert command table senior request - nationalid and user id i retrieved 
+//add a pending status
+//insert into table-requests(status,userid,nationalid)
+//values(add values)
+//return star -----> checkkk <-----
+//try and catch --- console.log err.message(result.ststus 500)
+  });
+
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
   //////////////////////////////////////////////////////////////
