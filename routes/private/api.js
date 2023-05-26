@@ -95,58 +95,70 @@ module.exports = function (app) {
  
   });
  
+app.post("/api/v1/payment/subscription",async function(req,res){
+  try {
+    const session_token = getSessionToken(req);
+    const session = await db
+      .select("*")
+      .from("se_project.sessions")
+      .where("token", session_token)
+      .first();
 
-  app.post("/api/v1/payment/subscription", async function (req, res) {
-    const { purchasedId, creditCardNumber, holderName, payedAmount, subType, zoneId } = req.body;
-  
-    let noOfTickets;
-    if (subType === 'annual') {
-      noOfTickets = 100;
-    } else if (subType === 'quarterly') {
-      noOfTickets = 50;
-    } else if (subType === 'monthly') {
-      noOfTickets = 10;
-    } else {
-      return res.status(400).json({ error: 'Invalid subscription type' });
+    if (!session) {
+      return res.status(401).send("Invalid session");
     }
-  
-    try {
-      const session_token = getSessionToken(req);
-      const session = await db
-        .select("*")
-        .from("se_project.sessions")
-        .where("token", session_token)
-        .first();  
-      
-      if (!session) {
-        return res.status(401).send("Invalid session");
-      }
-  
-      const newTransaction = {
-        purchasedid: purchasedId,
-        userid: session.userid,
-        amount: payedAmount,
-      };
-  
-      // Insert the transaction into the transactions table
-      const newTran = await db('se_project.transactions').insert(newTransaction).returning("*");
-  
-      const newSubscription = {
-        subtype: subType,
-        zoneid: zoneId,
-        userid: session.userid,
-        nooftickets: noOfTickets,
-      };
-  
-      // Insert the subscription into the subscription table
-      const newSub = await db('se_project.subscription').insert(newSubscription).returning("*");
-  
-      return res.status(200).json({ message: 'Subscription purchased successfully', nooftickets: noOfTickets });
-    } catch (error) {
-      console.error('Error inserting transaction or subscription:', error);
-      return res.status(500).json({ error: 'Failed to process the payment' });
-    }
+    const { purchasedid, creditCardNumber, holderName, amount, subtype, zoneid } = req.body;
+
+if(
+purchasedid===undefined ||
+creditCardNumber===undefined||
+holderName===undefined||
+amount===undefined||
+subtype===undefined||
+zoneid===undefined
+
+){
+  return res.status(400).send("All fields are required");
+}
+
+let nooftickets;
+if (subtype === "annual") {
+  nooftickets = 100;
+} else if (subtype === "quarterly") {
+  nooftickets = 50;
+} else if (subtype === "monthly") {
+  nooftickets = 10;
+} else {
+  return res.status(400).send("Invalid subscription type");
+}
+
+
+const [transactionsId]=await db ("se_project.transactions").insert({
+userid: session.userid,
+purchasedid: purchasedid,
+amount:amount,
+}).returning("id");
+
+await db ("se_project.subsription").insert({
+userid: session.userid,
+subtype:subtype,
+zoneid: zoneid,
+nooftickets: nooftickets,
   });
+
+  return res
+  .status(200)
+  .send(`Subscription purchased successfully. Number of tickets: ${nooftickets}`);
+} catch (e) {
+console.log(e.message);
+return res.status(500).send("Failed to purchase subscription");
+}
+});
+
+
+
+
+
 
   app.post("/api/v1/payment/ticket", async function (req, res) {
     try {
@@ -179,7 +191,7 @@ module.exports = function (app) {
         Origin === undefined ||
         Destination === undefined ||
         tripDate === undefined
-      ) {
+      ){
         return res.status(400).send("All fields are required");
       }
       const currentDateTime = new Date();
@@ -200,6 +212,8 @@ module.exports = function (app) {
         destination: Destination,
         tripdate: tripDate,
       }).returning("id");
+
+    
       
 
       
