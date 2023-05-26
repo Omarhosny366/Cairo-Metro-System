@@ -439,7 +439,52 @@ catch(error) {
 //return star -----> checkkk <-----
 //try and catch --- console.log err.message(result.ststus 500)
   });
+  app.put("/api/v1/ride/simulate", async (req, res) => {
+    try {
+      const { origin, destination, tripDate } = req.body;
+      const userId = 2; ///////write user session here//////
 
+      const originStation = await db("se_project.stations")
+        .where("stationname", origin)
+        .first();
+      const destinationStation = await db("se_project.stations")
+        .where("stationname", destination)
+        .first();
+
+      if (!originStation || !destinationStation) {
+        return res.status(400).json({ error: "Invalid origin or destination" });
+      }
+
+
+      const ticket = await db("se_project.tickets")
+        .select("id")
+        .where("userid", userId)///////write user session here//////
+        .first();
+
+      if (!ticket) {
+        return res.status(400).json({ error: "No ticket found for the user" });
+      }
+
+      const ticketId = ticket.id;
+
+
+      const ride = await db("se_project.rides")
+        .insert({
+          status: "completed",
+          origin: origin,
+          destination: destination,
+          userid: userId,///////write user session here//////
+          ticketid: ticketId,
+          tripdate: tripDate,
+        })
+        .returning("*");
+
+      return res.status(200).json(ride);
+    } catch (err) {
+      console.log("Error:", err);
+      return res.status(500).json({ error: "Failed to simulate ride" });
+    }
+  });
 ///////////////////////////////////////////////////////////////
   ////////////////////////admin methods/////////////////////////
   //////////////////////////////////////////////////////////////
