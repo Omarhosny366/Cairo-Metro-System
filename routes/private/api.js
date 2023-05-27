@@ -167,7 +167,6 @@ module.exports = function (app) {
         return res.status(401).send("Invalid session");
       }
       const {
-        purchasedId,
         creditCardNumber,
         holderName,
         payedAmount,
@@ -178,7 +177,7 @@ module.exports = function (app) {
   
       // Check if all required fields are provided
       if (
-        purchasedId === undefined ||
+        
         creditCardNumber === undefined ||
         holderName === undefined ||
         payedAmount === undefined ||
@@ -209,11 +208,7 @@ module.exports = function (app) {
       
 
       
-      //const tickerId=await db .select("id").from("se_project.tickets")
-      //.where("id",ticket.id)
       
-  
-      // Update the ride table with the new ticket information
        await db("se_project.rides").insert({
         status:"pending",
         origin: Origin,
@@ -227,7 +222,8 @@ module.exports = function (app) {
       await db("se_project.transactions").insert({
         amount:payedAmount,
         userid:session.userid,
-        purchasediid:purchasedId,
+        purchasediid:ticketId,
+        purchasetype:"ticket"
 
       });
   
@@ -405,12 +401,22 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
 
   app.post("/api/v1/tickets/purchase/subscription", async (req, res) => {
     try {
-      const { subId, origin, destination,tripDate} = req.body;
+      const { subId, Origin, Destination,tripDate} = req.body;
+      const session_token = getSessionToken(req);
+      const session = await db
+        .select("*")
+        .from("se_project.sessions")
+        .where("token", session_token)
+        .first();
+  
+      if (!session) {
+        return res.status(401).send("Invalid session");
+      }
   
     
-      const subscription = await db("se_project.subsription")
+      const subscription = await db("se_project.subscription")
         .where("id", subId)
-        .andWhere("userid", 2) ///////write user session here//////
+        .andWhere("userid", session.userid) ///////write user session here//////
         .first();
   
       if (!subscription) {
@@ -419,47 +425,33 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
       if (subscription.nooftickets === 0) {
         return res.status(400).json({ error: "No available tickets in the subscription." });
       }
-      ///////////////write method check price here////////////////
-      const ticketPrice =Math.floor(Math.random() * 91) + 10;
-      ;
+    
   
-      const ticket = await db("se_project.tickets")
+      const [ticket] = await db("se_project.tickets")
         .insert({
-          origin: origin,
-          destination: destination,
-          userid: 2,///////write user session here//////
-          subid: subId,
+          origin:Origin,
+          destination:Destination,
+          userid:session.userid,
+          subid:subId,
           tripdate: tripDate,
-        })
-        .returning("*");
-        const ticketNumber = await db("se_project.subsription")
-        .select("nooftickets")
-        .where("id", subId)
-        .first();
-
-if(!session)
-  return res.status(401).send("Invalid session");
+        }).returning("*");
+        await db("se_project.subscription").where("userid",session.userid).decrement("nooftickets", 1);
+        await db("se_project.rides").insert({
+          status:"pending",
+          origin: Origin,
+          destination: Destination,
+          userid: session.userid,
+          ticketid:ticket.id,
+          tripdate:tripDate
+   
   
-//get the user based on the provided nationalId
- const user = await db
-  .select("*")
-  .from("se_project.senior_requests")
-  .where("nationalid", nationalid)
-  .first();
+        });
 
-if (!user) {
-  return res.status(400).send("User not found");
-}
-//create senior request
-const seniorRequest = {
-  status: "Pending",
-  userid: user.id,
-  nationalid: nationalid,
-};
 
-await db("se_project.senior_requests").insert(seniorRequest);
 
-return res.status(200).send("Senior request submitted");
+
+
+return res.status(200).send("ticket is purchased ");
 }
 catch(error) {
   console.error(error);
@@ -502,9 +494,7 @@ return res.status(200).send("Senior request submitted");
 catch(error) {
   console.error(error);
   return res.status(500).send("Error processing the request");
-
-}
-  });
+}});
 
   
   //insert command table senior request - nationalid and user id i retrieved 
@@ -516,8 +506,16 @@ catch(error) {
   app.put("/api/v1/ride/simulate", async (req, res) => {
     try {
       const { origin, destination, tripDate } = req.body;
-      const userId = 2; ///////write user session here//////
-
+      const session_token = getSessionToken(req);
+      const session = await db
+        .select("*")
+        .from("se_project.sessions")
+        .where("token", session_token)
+        .first();
+  
+      if (!session) {
+        return res.status(401).send("Invalid session");
+      } 
       const originStation = await db("se_project.stations")
         .where("stationname", origin)
         .first();
@@ -532,7 +530,7 @@ catch(error) {
 
       const ticket = await db("se_project.tickets")
         .select("id")
-        .where("userid", userId)///////write user session here//////
+        .where("userid", session.userid)///////write user session here//////
         .first();
 
       if (!ticket) {
@@ -547,7 +545,7 @@ catch(error) {
           status: "completed",
           origin: origin,
           destination: destination,
-          userid: userId,///////write user session here//////
+          userid: session.userid,///////write user session here//////
           ticketid: ticketId,
           tripdate: tripDate,
         })
