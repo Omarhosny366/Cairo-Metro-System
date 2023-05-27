@@ -105,48 +105,50 @@ module.exports = function (app) {
    if (!session) {
         return res.status(401).send("Invalid session");
       }
-      const { purchasedid, creditCardNumber, holderName, amount, subtype, zoneid } = req.body;
+      const {creditCardNumber, holderName, Payedamount, subtype, zoneId } = req.body;
   
   if(
-  purchasedid===undefined ||
   creditCardNumber===undefined||
   holderName===undefined||
-  amount===undefined||
+  Payedamount===undefined||
   subtype===undefined||
-  zoneid===undefined
+  zoneId===undefined
   
   ){
     return res.status(400).send("All fields are required");
   }
   
-  let nooftickets;
+  let Nooftickets;
   if (subtype === "annual") {
-    nooftickets = 100;
+    Nooftickets = 100;
   } else if (subtype === "quarterly") {
-    nooftickets = 50;
+    Nooftickets = 50;
   } else if (subtype === "monthly") {
-    nooftickets = 10;
+    Nooftickets = 10;
   } else {
     return res.status(400).send("Invalid subscription type");
   }
   
   
+  
+  
+  const [sub] =await db ("se_project.subcsription").insert({
+  userid:session.userid,
+  subtype:subtype,
+  zoneid:zoneId,
+  nooftickets:Nooftickets,
+    }).returning("*");
+    
   const [transactionsId]=await db ("se_project.transactions").insert({
   userid: session.userid,
-  purchasedid: purchasedid,
-  amount:amount,
+  purchasediid: sub.id,
+  amount:Payedamount,
+  purchasetype:"subscription"
   }).returning("id");
-  
-  await db ("se_project.subsription").insert({
-  userid: session.userid,
-  subtype:subtype,
-  zoneid: zoneid,
-  nooftickets: nooftickets,
-    });
   
     return res
     .status(200)
-    .send(`Subscription purchased successfully. Number of tickets: ${nooftickets}`);
+    .send(`Subscription purchased successfully. Number of tickets: ${Nooftickets}`);
   } catch (e) {
   console.log(e.message);
   return res.status(500).send("Failed to purchase subscription");
