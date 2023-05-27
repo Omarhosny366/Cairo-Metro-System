@@ -35,7 +35,7 @@ const getUser = async function (req) {
 
 module.exports = function (app) {
   // example
-  app.put("/users", async function (req, res) {
+  app.get("/users", async function (req, res) {
     try {
        const user = await getUser(req);
      // const {userId}=req.body
@@ -52,13 +52,11 @@ module.exports = function (app) {
   app.put("/api/v1/password/reset", async function (req, res) {
     const { newPassword } = req.body;
 
-    // Check if the new password is provided
     if (!newPassword) {
       return res.status(400).send("New password is required");
     }
 
     try {
-       //Get the user from the session token
      
        const session_token = getSessionToken(req);
     const session = await db
@@ -320,7 +318,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
   
     try {
       // Fetch the origin station details
-      const originStation = await db
+      let originStation = await db
         .select("*")
         .from("se_project.stations")
         .where("id", originId)
@@ -337,43 +335,71 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
         return res.status(400).send("Invalid origin or destination station");
       }
   
-      const visitedStations = [originStation.stationname];
-  
       let totalPrice = 0;
       let currentStationId = originId;
-      let iterationCount = 0;
-      const maxIterations = 100; // Set a maximum number of iterations limit
+      let destinationStationId = destinationId;
+      let currentStationType = originStation.stationtype;
+      let destinationStationType = destinationStation.stationtype;
+      let counter = 1;
   
-      while (currentStationId != destinationId ) {
-        const route = await db
-          .select("*")
-          .from("se_project.routes")
-          .join("se_project.stationroutes", "se_project.routes.id", "=", "se_project.stationroutes.routeid")
-          .where("se_project.routes.fromstationid", currentStationId)
-          .andWhere("se_project.stationroutes.stationid", currentStationId)
-          .first();
+      while (currentStationId <destinationStationId) {
+        const priceResult = await db
+          .select("price")
+          .from("se_project.zones")
+          .where("zonetype", currentStationType)
+          .returning("*");
   
-        if (!route) {
-          return res.status(400).send("No route found from the origin to the destination");
+        if (priceResult.length === 0) {
+          return res.status(400).send("No price found for the zone");
         }
   
-        visitedStations.push(route.tostationid);
+        const { price } = priceResult[0];
+        totalPrice += price;
   
-        totalPrice += 50;
-        currentStationId = route.tostationid;
-        iterationCount++;
+        currentStationId += counter;
+  
+        originStation = await db
+          .select("*")
+          .from("se_project.stations")
+          .where("id",currentStationId)
+          .first().returning("*");
+          console.log(originStation.id)
+  
+        if (!originStation) {
+          return res.status(400).send("Invalid origin or destination station");
+        }
+  
+        currentStationType = originStation.stationtype;
+        counter += 1;
       }
   
-      if (iterationCount === maxIterations) {
-        return res.status(400).send("Maximum iteration limit reached");
+      const priceResult = await db
+        .select("price")
+        .from("se_project.zones")
+        .where("zonetype", destinationStationType)
+        .returning("*");
+  
+      if (priceResult.length === 0) {
+        return res.status(400).send("No price found for the destination zone");
       }
   
-      return res.status(200).json({ price: totalPrice, visitedStations });
+      const { price } = priceResult[0];
+      totalPrice += price;
+  
+      return res.status(200).json({ price: totalPrice });
     } catch (err) {
       console.log(err.message);
       return res.status(400).send("Error occurred while calculating the price");
     }
   });
+  
+ 
+  
+  
+  
+  
+  
+  
 
   app.post("/api/v1/tickets/purchase/subscription", async (req, res) => {
     try {
