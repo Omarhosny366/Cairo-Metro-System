@@ -35,7 +35,7 @@ const getUser = async function (req) {
 
 module.exports = function (app) {
   // example
-  app.put("/users", async function (req, res) {
+  app.get("/users", async function (req, res) {
     try {
        const user = await getUser(req);
      // const {userId}=req.body
@@ -52,13 +52,11 @@ module.exports = function (app) {
   app.put("/api/v1/password/reset", async function (req, res) {
     const { newPassword } = req.body;
 
-    // Check if the new password is provided
     if (!newPassword) {
       return res.status(400).send("New password is required");
     }
 
     try {
-       //Get the user from the session token
      
        const session_token = getSessionToken(req);
     const session = await db
@@ -107,48 +105,50 @@ module.exports = function (app) {
    if (!session) {
         return res.status(401).send("Invalid session");
       }
-      const { purchasedid, creditCardNumber, holderName, amount, subtype, zoneid } = req.body;
+      const {creditCardNumber, holderName, Payedamount, subtype, zoneId } = req.body;
   
   if(
-  purchasedid===undefined ||
   creditCardNumber===undefined||
   holderName===undefined||
-  amount===undefined||
+  Payedamount===undefined||
   subtype===undefined||
-  zoneid===undefined
+  zoneId===undefined
   
   ){
     return res.status(400).send("All fields are required");
   }
   
-  let nooftickets;
+  let Nooftickets;
   if (subtype === "annual") {
-    nooftickets = 100;
+    Nooftickets = 100;
   } else if (subtype === "quarterly") {
-    nooftickets = 50;
+    Nooftickets = 50;
   } else if (subtype === "monthly") {
-    nooftickets = 10;
+    Nooftickets = 10;
   } else {
     return res.status(400).send("Invalid subscription type");
   }
   
   
+  
+  
+  const [sub] =await db ("se_project.subcsription").insert({
+  userid:session.userid,
+  subtype:subtype,
+  zoneid:zoneId,
+  nooftickets:Nooftickets,
+    }).returning("*");
+    
   const [transactionsId]=await db ("se_project.transactions").insert({
   userid: session.userid,
-  purchasedid: purchasedid,
-  amount:amount,
+  purchasediid: sub.id,
+  amount:Payedamount,
+  purchasetype:"subscription"
   }).returning("id");
-  
-  await db ("se_project.subsription").insert({
-  userid: session.userid,
-  subtype:subtype,
-  zoneid: zoneid,
-  nooftickets: nooftickets,
-    });
   
     return res
     .status(200)
-    .send(`Subscription purchased successfully. Number of tickets: ${nooftickets}`);
+    .send(`Subscription purchased successfully. Number of tickets: ${Nooftickets}`);
   } catch (e) {
   console.log(e.message);
   return res.status(500).send("Failed to purchase subscription");
@@ -167,7 +167,6 @@ module.exports = function (app) {
         return res.status(401).send("Invalid session");
       }
       const {
-        purchasedId,
         creditCardNumber,
         holderName,
         payedAmount,
@@ -178,7 +177,7 @@ module.exports = function (app) {
   
       // Check if all required fields are provided
       if (
-        purchasedId === undefined ||
+        
         creditCardNumber === undefined ||
         holderName === undefined ||
         payedAmount === undefined ||
@@ -209,11 +208,7 @@ module.exports = function (app) {
       
 
       
-      //const tickerId=await db .select("id").from("se_project.tickets")
-      //.where("id",ticket.id)
       
-  
-      // Update the ride table with the new ticket information
        await db("se_project.rides").insert({
         status:"pending",
         origin: Origin,
@@ -227,7 +222,8 @@ module.exports = function (app) {
       await db("se_project.transactions").insert({
         amount:payedAmount,
         userid:session.userid,
-        purchasediid:purchasedId,
+        purchasediid:ticketId,
+        purchasetype:"ticket"
 
       });
   
@@ -320,7 +316,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
   
     try {
       // Fetch the origin station details
-      const originStation = await db
+      let originStation = await db
         .select("*")
         .from("se_project.stations")
         .where("id", originId)
@@ -337,52 +333,90 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
         return res.status(400).send("Invalid origin or destination station");
       }
   
-      const visitedStations = [originStation.stationname];
-  
       let totalPrice = 0;
       let currentStationId = originId;
-      let iterationCount = 0;
-      const maxIterations = 100; // Set a maximum number of iterations limit
+      let destinationStationId = destinationId;
+      let currentStationType = originStation.stationtype;
+      let destinationStationType = destinationStation.stationtype;
+      let counter = 1;
   
-      while (currentStationId != destinationId ) {
-        const route = await db
-          .select("*")
-          .from("se_project.routes")
-          .join("se_project.stationroutes", "se_project.routes.id", "=", "se_project.stationroutes.routeid")
-          .where("se_project.routes.fromstationid", currentStationId)
-          .andWhere("se_project.stationroutes.stationid", currentStationId)
-          .first();
+      while (currentStationId <destinationStationId) {
+        const priceResult = await db
+          .select("price")
+          .from("se_project.zones")
+          .where("zonetype", currentStationType)
+          .returning("*");
   
-        if (!route) {
-          return res.status(400).send("No route found from the origin to the destination");
+        if (priceResult.length === 0) {
+          return res.status(400).send("No price found for the zone");
         }
   
-        visitedStations.push(route.tostationid);
+        const { price } = priceResult[0];
+        totalPrice += price;
   
-        totalPrice += 50;
-        currentStationId = route.tostationid;
-        iterationCount++;
+        currentStationId += counter;
+  
+        originStation = await db
+          .select("*")
+          .from("se_project.stations")
+          .where("id",currentStationId)
+          .first().returning("*");
+          console.log(originStation.id)
+  
+        if (!originStation) {
+          return res.status(400).send("Invalid origin or destination station");
+        }
+  
+        currentStationType = originStation.stationtype;
+        counter += 1;
       }
   
-      if (iterationCount === maxIterations) {
-        return res.status(400).send("Maximum iteration limit reached");
+      const priceResult = await db
+        .select("price")
+        .from("se_project.zones")
+        .where("zonetype", destinationStationType)
+        .returning("*");
+  
+      if (priceResult.length === 0) {
+        return res.status(400).send("No price found for the destination zone");
       }
   
-      return res.status(200).json({ price: totalPrice, visitedStations });
+      const { price } = priceResult[0];
+      totalPrice += price;
+  
+      return res.status(200).json({ price: totalPrice });
     } catch (err) {
       console.log(err.message);
       return res.status(400).send("Error occurred while calculating the price");
     }
   });
+  
+ 
+  
+  
+  
+  
+  
+  
 
   app.post("/api/v1/tickets/purchase/subscription", async (req, res) => {
     try {
-      const { subId, origin, destination,tripDate} = req.body;
+      const { subId, Origin, Destination,tripDate} = req.body;
+      const session_token = getSessionToken(req);
+      const session = await db
+        .select("*")
+        .from("se_project.sessions")
+        .where("token", session_token)
+        .first();
+  
+      if (!session) {
+        return res.status(401).send("Invalid session");
+      }
   
     
-      const subscription = await db("se_project.subsription")
+      const subscription = await db("se_project.subscription")
         .where("id", subId)
-        .andWhere("userid", 2) ///////write user session here//////
+        .andWhere("userid", session.userid) ///////write user session here//////
         .first();
   
       if (!subscription) {
@@ -391,47 +425,33 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
       if (subscription.nooftickets === 0) {
         return res.status(400).json({ error: "No available tickets in the subscription." });
       }
-      ///////////////write method check price here////////////////
-      const ticketPrice =Math.floor(Math.random() * 91) + 10;
-      ;
+    
   
-      const ticket = await db("se_project.tickets")
+      const [ticket] = await db("se_project.tickets")
         .insert({
-          origin: origin,
-          destination: destination,
-          userid: 2,///////write user session here//////
-          subid: subId,
+          origin:Origin,
+          destination:Destination,
+          userid:session.userid,
+          subid:subId,
           tripdate: tripDate,
-        })
-        .returning("*");
-        const ticketNumber = await db("se_project.subsription")
-        .select("nooftickets")
-        .where("id", subId)
-        .first();
-
-if(!session)
-  return res.status(401).send("Invalid session");
+        }).returning("*");
+        await db("se_project.subscription").where("userid",session.userid).decrement("nooftickets", 1);
+        await db("se_project.rides").insert({
+          status:"pending",
+          origin: Origin,
+          destination: Destination,
+          userid: session.userid,
+          ticketid:ticket.id,
+          tripdate:tripDate
+   
   
-//get the user based on the provided nationalId
- const user = await db
-  .select("*")
-  .from("se_project.senior_requests")
-  .where("nationalid", nationalid)
-  .first();
+        });
 
-if (!user) {
-  return res.status(400).send("User not found");
-}
-//create senior request
-const seniorRequest = {
-  status: "Pending",
-  userid: user.id,
-  nationalid: nationalid,
-};
 
-await db("se_project.senior_requests").insert(seniorRequest);
 
-return res.status(200).send("Senior request submitted");
+
+
+return res.status(200).send("ticket is purchased ");
 }
 catch(error) {
   console.error(error);
@@ -474,9 +494,7 @@ return res.status(200).send("Senior request submitted");
 catch(error) {
   console.error(error);
   return res.status(500).send("Error processing the request");
-
-}
-  });
+}});
 
   
   //insert command table senior request - nationalid and user id i retrieved 
@@ -488,8 +506,16 @@ catch(error) {
   app.put("/api/v1/ride/simulate", async (req, res) => {
     try {
       const { origin, destination, tripDate } = req.body;
-      const userId = 2; ///////write user session here//////
-
+      const session_token = getSessionToken(req);
+      const session = await db
+        .select("*")
+        .from("se_project.sessions")
+        .where("token", session_token)
+        .first();
+  
+      if (!session) {
+        return res.status(401).send("Invalid session");
+      } 
       const originStation = await db("se_project.stations")
         .where("stationname", origin)
         .first();
@@ -504,7 +530,7 @@ catch(error) {
 
       const ticket = await db("se_project.tickets")
         .select("id")
-        .where("userid", userId)///////write user session here//////
+        .where("userid", session.userid)///////write user session here//////
         .first();
 
       if (!ticket) {
@@ -519,7 +545,7 @@ catch(error) {
           status: "completed",
           origin: origin,
           destination: destination,
-          userid: userId,///////write user session here//////
+          userid: session.userid,///////write user session here//////
           ticketid: ticketId,
           tripdate: tripDate,
         })
