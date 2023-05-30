@@ -58,20 +58,12 @@ module.exports = function (app) {
 
     try {
      
-       const session_token = getSessionToken(req);
-    const session = await db
-      .select("*")
-      .from("se_project.sessions")
-      .where("token", session_token)
-      .first();
+      const user = await getUser(req);
 
-    if (!session) {
-      return res.status(401).send("Invalid session");
-    }
-
+   
     // Update the user's password in the database
     await db("se_project.users")
-      .where("id", session.userid)
+      .where("id", user.userid)
       .update({ password: newPassword });
 
       return res.status(200).send("Password reset successful");

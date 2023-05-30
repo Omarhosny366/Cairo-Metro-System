@@ -43,4 +43,15 @@ module.exports = function(app) {
     return res.render('stations_example', { ...user, stations });
   });
 
+  app.get('/resetPassword', async function(req, res) {
+    try {
+      const user = await getUser(req);
+      return res.render('reset_password');
+    } catch (e) {
+      console.log(e.message);
+      return res.status(500).send('Internal server error');
+    }
+  });
+
+
 };
