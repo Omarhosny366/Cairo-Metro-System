@@ -28,13 +28,13 @@ publicApiRoutes(app);// uncomment
 
 // The routes/views below can only be accessed if the user is authenticated
 
-<<<<<<< HEAD
+
 // uncomment to view fronte
 privateViewRoutes(app);
-=======
+
 // uncomment to view frontend
  privateViewRoutes(app);
->>>>>>> 818223d788974ac21a35af03dd05927fc7f52643
+
 privateApiRoutes(app);
 
 // If request doesn't match any of the above routes then render the 404 page
