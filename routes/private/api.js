@@ -132,7 +132,7 @@ module.exports = function (app) {
   
   
   
-  const [sub] =await db ("se_project.subcsription").insert({
+  const [sub] =await db ("se_project.subsription").insert({
   userid:session.userid,
   subtype:subtype,
   zoneid:zoneId,
@@ -259,7 +259,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
     }
 
     // Retrieve the user's subscription from the subscription table
-    const userSubscription = await db("se_project.subscriptions")
+    const userSubscription = await db("se_project.subsription")
       .where("userid", ticket.userid)
       .first();
 
@@ -414,7 +414,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
       }
   
     
-      const subscription = await db("se_project.subscription")
+      const subscription = await db("se_project.subsription")
         .where("id", subId)
         .andWhere("userid", session.userid) ///////write user session here//////
         .first();
@@ -435,7 +435,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
           subid:subId,
           tripdate: tripDate,
         }).returning("*");
-        await db("se_project.subscription").where("userid",session.userid).decrement("nooftickets", 1);
+        await db("se_project.subsription").where("userid",session.userid).decrement("nooftickets", 1);
         await db("se_project.rides").insert({
           status:"pending",
           origin: Origin,
