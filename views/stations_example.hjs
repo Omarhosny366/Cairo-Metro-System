@@ -32,7 +32,6 @@
           <tr>
             <th scope="col">id</th>
             <th scope="col">Name</th>
-           
             <th scope="col">Type</th>
             <th scope="col">Position</th>
             <th scope="col">status</th>
