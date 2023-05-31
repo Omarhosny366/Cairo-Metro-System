@@ -65,9 +65,9 @@ module.exports = function(app) {
     }
 
   });
-<<<<<<< HEAD
-}
-=======
+
+
+
   app.get('/subscriptions', async function(req, res) {
     try {
       const user = await getUser(req);
@@ -85,5 +85,5 @@ module.exports = function(app) {
     return res.render('Tickets', { rides });
   });
 
+
 };
->>>>>>> 1696e131953c34f3370014c0d52b106ade04c6c3
