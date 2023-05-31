@@ -60,10 +60,6 @@ module.exports = function (app) {
      
       const user = await getUser(req);
 
-      if (!user) {
-        return res.status(401).send("Invalid session");
-      }
-
    
     // Update the user's password in the database
     await db("se_project.users")
@@ -387,6 +383,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
 
   app.post("/api/v1/tickets/purchase/subscription", async (req, res) => {
     try {
+      
       const { subId, Origin, Destination,tripDate} = req.body;
       const user = await getUser(req);
   
@@ -534,7 +531,7 @@ catch(error) {
   //////////////////////////////////////////////////////////////
   
   app.post("/api/v1/station", async function (req, res)   {
-
+    
     const stationexists = await db
     .select("*")
     .from("se_project.stations")
@@ -549,6 +546,11 @@ catch(error) {
     stationstatus :req.body.stationstatus
   };
     try {
+       
+      const user = await getUser(req);
+     if(!user)
+       return res.status(401).send("Internal server error");
+   
       const addedStation = await db("se_project.stations")
         .insert(newStation)
         .returning("*");
@@ -562,6 +564,11 @@ catch(error) {
   
   app.put("/api/v1/station/:stationId", async (req, res) => {
     try {
+       
+      const user = await getUser(req);
+     if(!user)
+       return res.status(401).send("Internal server error");
+   
       const { stationname } = req.body;
       const { stationId } = req.params;
       const updatedStation = await db("se_project.stations")
@@ -580,7 +587,11 @@ catch(error) {
 
   
   app.post("/api/v1/route", async function (req, res)   {
-
+  
+    const user = await getUser(req);
+    if(!user)
+      return res.status(401).send("Internal server error");
+  
     const routeexist = await db
     .select("*")
     .from("se_project.routes")
@@ -620,6 +631,11 @@ catch(error) {
   
   app.put("/api/v1/route/:routeId", async (req, res) => {
     try {
+       
+      const user = await getUser(req);
+     if(!user)
+       return res.status(401).send("Internal server error");
+   
       const { routename } = req.body;
       const { routeId } = req.params;
       const updatedroutes = await db("se_project.routes")
@@ -639,6 +655,11 @@ catch(error) {
   
   app.delete("/api/v1/route/:routeId", async (req, res) => {
     try {
+       
+      const user = await getUser(req);
+     if(!user)
+       return res.status(401).send("Internal server error");
+   
       const routeId = parseInt(req.params.routeId);
   
       const route = await db("se_project.routes").where("id", routeId).first();
@@ -686,6 +707,11 @@ catch(error) {
   
   app.put("/api/v1/requests/refunds/:requestId", async (req, res) => {
     try {
+       
+      const user = await getUser(req);
+     if(!user)
+       return res.status(401).send("Internal server error");
+   
       const { reqStatus } = req.body;
       const { requestId } = req.params;
   
@@ -756,6 +782,7 @@ catch(error) {
   
           
         }
+        await db("se_project.rides").where("tickeid",ticket.id).del();
       }
   
       const updatedStatus = await db("se_project.refund_requests")
@@ -764,7 +791,8 @@ catch(error) {
           status: reqStatus
         })
         .returning("*");
-  
+
+      
       
   
       return res.status(200).json(updatedStatus);
@@ -776,6 +804,11 @@ catch(error) {
     
   app.put("/api/v1/requests/senior/:requestId", async (req, res) => {
     try {
+       
+      const user = await getUser(req);
+     if(!user)
+       return res.status(401).send("Internal server error");
+   
         const {seniorStatus} = req.body;
         const {requestId} = req.params;
         const {userid}=await db("se_project.senior_requests")
@@ -821,6 +854,11 @@ catch(error) {
   });
   app.put("/api/v1/zones/:zoneId", async (req, res) => {
     try {
+       
+      const user = await getUser(req);
+     if(!user)
+       return res.status(401).send("Internal server error");
+   
       const { zoneId } = req.params;
       const { price } = req.body;
   
@@ -840,6 +878,11 @@ catch(error) {
 
    app.delete("/api/v1/stationn/:stationId", async function(req, res) {
     try {
+       
+      const user = await getUser(req);
+     if(!user)
+       return res.status(401).send("Internal server error");
+   
       const Sid = req.params.stationId;
       const allRoutes = await db("se_project.routes").select("*");
       const StationToStationID = [];
