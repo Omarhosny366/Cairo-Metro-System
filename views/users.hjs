@@ -27,16 +27,16 @@
             <th scope="col">id</th>
             <th scope="col">First</th>
             <th scope="col">Last</th>
-            <th scope="col">Major</th>
+            <th scope="col">Email</th>
             <th scope="col">Role</th>
           </tr>
           {{#users}}
             <tr>
               <td>{{id}}</td>
-              <td>{{firstName}}</td>
-              <td>{{lastName}}</td>
-              <td>{{major}}</td>
-              <td>{{roleId}}</td>
+              <td>{{firstname}}</td>
+              <td>{{lastname}}</td>
+              <td>{{email}}</td>
+              <td>{{roleid}}</td>
             </tr>
           {{/users}}
         </thead>
