@@ -25,6 +25,8 @@
             <li><a href="/users">Users</a></li>
             <li><a href="/users/add">Add Users</a></li>
             <li><a href="/resetPassword">Reset Password</a></li>
+             <li><a href="/manage/stations">Manage stations</a></li>
+            
 
             <li><a href="/">Logout</a></li>
           </ul>

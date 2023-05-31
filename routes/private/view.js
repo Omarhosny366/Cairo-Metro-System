@@ -51,7 +51,18 @@ module.exports = function(app) {
       console.log(e.message);
       return res.status(500).send('Internal server error');
     }
+    
+  }); 
+  app.get('/manage/stations', async function(req, res) {
+    try {
+      const user = await getUser(req);
+      const stations = await db.select('*').from('se_project.stations');
+     
+      return res.render('manage_station',{stations});
+    } catch (e) {
+      console.log(e.message);
+      return res.status(500).send('Internal server error');
+    }
+
   });
-
-
-};
+}
