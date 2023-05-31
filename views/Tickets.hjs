@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Purchase Ticket</title>
+    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+    <link rel='stylesheet' href='/styles/style.css' />
+    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div>
+      <div>
+        <nav class="navbar navbar-inverse" style="padding-left:130px;">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/dashboard">Home</a></li>
+            <li><a href="/">Logout</a></li>    
+          </ul>
+        </nav>
+      </div>
+      <div class="center">
+        <h1>Fill The Requirements</h1>
+      </div>
+      <div style="padding-left: 500px">
+        <form class="form-horizontal" style="width: 50%;">
+          <div class="form-group">
+            <label for="creditCardNumber" class="col-sm-2 control-label">Credit Card Number</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="creditCardNumber" name="creditCardNumber" placeholder="Credit Card Number" value="">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="holderName" class="col-sm-2 control-label">Holder Name</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="holderName" name="holderName" placeholder="Holder Name" value="">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="payedAmount" class="col-sm-2 control-label">Amount</label>
+            <div class="col-sm-10">
+              <input type="amount" class="form-control" id="payedAmount" name="payedAmount" placeholder="Amount" value="">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="Origin" class="col-sm-2 control-label">Origin Station</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="Origin" name="Origin" placeholder="Origin" value="">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="Destination" class="col-sm-2 control-label">Destination Station</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="Destination" name="Destination" placeholder="Destination" value="">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="tripDate" class="col-sm-2 control-label">Trip Date</label>
+            <div class="col-sm-10">
+              <input type="date" class="form-control" id="tripDate" name="tripDate" placeholder="Trip Date" value="">
+            </div>
+          </div>
+          <button id="purchase" type="button" class="btn btn-primary">Purchase Ticket</button>
+        </form>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">id</th>
+            <th scope="col">Status</th>
+            <th scope="col">Origin</th>
+            <th scope="col">Destination</th>
+            <th scope="col">userid</th>
+            <th scope="col">ticketid</th>
+            <th scope="col">tripDate</th>
+          </tr>
+        </thead>
+        <tbody id="ridesTableBody">
+          {{#rides}}
+          <tr>
+            <td>{{id}}</td>
+            <td>{{status}}</td>
+            <td>{{origin}}</td>
+            <td>{{destination}}</td>
+            <td>{{userid}}</td>
+            <td>{{ticketid}}</td>
+            <td>{{tripdate}}</td>
+          </tr> 
+          {{/rides}}
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      $(document).ready(function() {
+        $("#purchase").click(function() {
+          const creditCardNumber = $('#creditCardNumber').val();
+          const holderName = $('#holderName').val();
+          const payedAmount = $('#payedAmount').val();
+          const Origin = $('#Origin').val();
+          const Destination = $('#Destination').val();
+          const tripDate = $('#tripDate').val();
+
+          if (
+            creditCardNumber === '' ||
+            holderName === '' ||
+            payedAmount === '' ||
+            Origin === '' ||
+            Destination === '' ||
+            tripDate === ''
+          ) {
+            alert('Please fill all the fields');
+            return;
+          }
+
+          const data = {
+            creditCardNumber,
+            holderName,
+            payedAmount,
+            Origin,
+            Destination,
+            tripDate,
+          };
+
+          $.ajax({
+            type: 'POST',
+            url: '/api/v1/payment/ticket',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function(serverResponse) {
+              if (serverResponse) {
+                alert('Ticket has been purchased successfully');
+                location.reload();
+              }
+            },
+            error: function(errorResponse) {
+              if (errorResponse) {
+                alert(`Ticket purchase error: ${errorResponse.responseText}`);
+              }
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

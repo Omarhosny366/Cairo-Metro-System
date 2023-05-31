@@ -65,4 +65,25 @@ module.exports = function(app) {
     }
 
   });
+<<<<<<< HEAD
 }
+=======
+  app.get('/subscriptions', async function(req, res) {
+    try {
+      const user = await getUser(req);
+
+      return res.render('view_zones');
+    } catch (e) {
+      console.log(e.message);
+      return res.status(500).send('Internal server error');
+    }
+  });
+
+  app.get('/tickets', async function(req, res) {
+    const user = await getUser(req);
+    const rides = await db.select('*').from('se_project.rides').where("userid", user.userid);
+    return res.render('Tickets', { rides });
+  });
+
+};
+>>>>>>> 1696e131953c34f3370014c0d52b106ade04c6c3

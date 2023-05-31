@@ -25,14 +25,19 @@
             <li><a href="/users">Users</a></li>
             <li><a href="/users/add">Add Users</a></li>
             <li><a href="/resetPassword">Reset Password</a></li>
+<<<<<<< HEAD
              <li><a href="/manage/stations">Manage stations</a></li>
             
+=======
+              <li><a href="/subscriptions">Get Zones</a></li>
+              <li><a href="/tickets">Purchase Ticket</a></li>
+>>>>>>> 1696e131953c34f3370014c0d52b106ade04c6c3
 
             <li><a href="/">Logout</a></li>
           </ul>
        </nav>
       </div>
-      <p>Welcome {{firstName}}, you are logged in!</p>
+      <p>Welcome {{firstname}}, you are logged in!</p>
     </div>
   </body>
   </html>
