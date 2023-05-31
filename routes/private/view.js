@@ -43,6 +43,19 @@ module.exports = function(app) {
     return res.render('stations_example', { ...user, stations });
   });
 
+
+    // Register HTTP endpoint to render /courses page
+  app.get('/manage/routes', async function(req, res) {
+   try{ const user = await getUser(req);
+    const routes = await db.select('*').from('se_project.routes');
+    return res.render('manage_routes', {routes});
+  } catch (e) {
+    console.log(e.message);
+    return res.status(500).send('Internal server error');
+  }
+  });
+
+
   app.get('/resetPassword', async function(req, res) {
     try {
       const user = await getUser(req);
