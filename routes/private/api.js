@@ -60,6 +60,10 @@ module.exports = function (app) {
      
       const user = await getUser(req);
 
+      if (!user) {
+        return res.status(401).send("Invalid session");
+      }
+
    
     // Update the user's password in the database
     await db("se_project.users")
@@ -88,13 +92,8 @@ module.exports = function (app) {
 
   app.post("/api/v1/payment/subscription",async function(req,res){
     try {
-      const session_token = getSessionToken(req);
-      const session = await db
-        .select("*")
-        .from("se_project.sessions")
-        .where("token", session_token)
-        .first();
-   if (!session) {
+      const user = await getUser(req);
+      if (!user) {
         return res.status(401).send("Invalid session");
       }
       const {creditCardNumber, holderName, Payedamount, subtype, zoneId } = req.body;
@@ -125,14 +124,14 @@ module.exports = function (app) {
   
   
   const [sub] =await db ("se_project.subsription").insert({
-  userid:session.userid,
+  userid:user.userid,
   subtype:subtype,
   zoneid:zoneId,
   nooftickets:Nooftickets,
     }).returning("*");
     
   const [transactionsId]=await db ("se_project.transactions").insert({
-  userid: session.userid,
+  userid: user.userid,
   purchasediid: sub.id,
   amount:Payedamount,
   purchasetype:"subscription"
@@ -148,14 +147,9 @@ module.exports = function (app) {
   })
   app.post("/api/v1/payment/ticket", async function (req, res) {
     try {
-      const session_token = getSessionToken(req);
-      const session = await db
-        .select("*")
-        .from("se_project.sessions")
-        .where("token", session_token)
-        .first();
+      const user = await getUser(req);
   
-      if (!session) {
+      if (!user) {
         return res.status(401).send("Invalid session");
       }
       const {
@@ -191,7 +185,7 @@ module.exports = function (app) {
   
       // Insert the ticket into the tickets table
       const [ticketId] = await db("se_project.tickets").insert({
-        userid: session.userid,
+        userid: user.userid,
         subid: null,
         origin: Origin,
         destination: Destination,
@@ -205,7 +199,7 @@ module.exports = function (app) {
         status:"pending",
         origin: Origin,
         destination: Destination,
-        userid: session.userid,
+        userid: user.userid,
         ticketid:ticketId,
         tripdate:tripDate
  
@@ -213,7 +207,7 @@ module.exports = function (app) {
       });
       await db("se_project.transactions").insert({
         amount:payedAmount,
-        userid:session.userid,
+        userid:user.userid,
         purchasediid:ticketId,
         purchasetype:"ticket"
 
@@ -394,21 +388,16 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
   app.post("/api/v1/tickets/purchase/subscription", async (req, res) => {
     try {
       const { subId, Origin, Destination,tripDate} = req.body;
-      const session_token = getSessionToken(req);
-      const session = await db
-        .select("*")
-        .from("se_project.sessions")
-        .where("token", session_token)
-        .first();
+      const user = await getUser(req);
   
-      if (!session) {
+      if (!user) {
         return res.status(401).send("Invalid session");
       }
   
     
       const subscription = await db("se_project.subsription")
         .where("id", subId)
-        .andWhere("userid", session.userid) ///////write user session here//////
+        .andWhere("userid", user.userid) ///////write user session here//////
         .first();
   
       if (!subscription) {
@@ -423,7 +412,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
         .insert({
           origin:Origin,
           destination:Destination,
-          userid:session.userid,
+          userid:user.userid,
           subid:subId,
           tripdate: tripDate,
         }).returning("*");
@@ -432,7 +421,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
           status:"pending",
           origin: Origin,
           destination: Destination,
-          userid: session.userid,
+          userid: user.userid,
           ticketid:ticket.id,
           tripdate:tripDate
    
@@ -460,22 +449,18 @@ catch(error) {
   }
 //get user id from the current session
 try{
-  const session_token =getSessionToken(req);
-   const session = await db
-  .select("*")
-  .from("se_project.sessions")
-  .where("token", session_token)
-  .first();
-
-if(!session)
-  return res.status(401).send("Invalid session");
+  const user = await getUser(req);
+  
+  if (!user) {
+    return res.status(401).send("Invalid session");
+  }
 
 
 
 //create senior request
 const seniorRequest = {
   status: "Pending",
-  userid:session.userid,
+  userid:user.userid,
   nationalid: nationalid,
 };
 
@@ -498,16 +483,11 @@ catch(error) {
   app.put("/api/v1/ride/simulate", async (req, res) => {
     try {
       const { origin, destination, tripDate } = req.body;
-      const session_token = getSessionToken(req);
-      const session = await db
-        .select("*")
-        .from("se_project.sessions")
-        .where("token", session_token)
-        .first();
+      const user = await getUser(req);
   
-      if (!session) {
+      if (!user) {
         return res.status(401).send("Invalid session");
-      } 
+      }
       const originStation = await db("se_project.stations")
         .where("stationname", origin)
         .first();
@@ -522,7 +502,7 @@ catch(error) {
 
       const ticket = await db("se_project.tickets")
         .select("id")
-        .where("userid", session.userid)///////write user session here//////
+        .where("userid", user.userid)///////write user session here//////
         .first();
 
       if (!ticket) {
@@ -537,7 +517,7 @@ catch(error) {
           status: "completed",
           origin: origin,
           destination: destination,
-          userid: session.userid,///////write user session here//////
+          userid: user.userid,///////write user session here//////
           ticketid: ticketId,
           tripdate: tripDate,
         })
