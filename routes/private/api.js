@@ -387,6 +387,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
 
   app.post("/api/v1/tickets/purchase/subscription", async (req, res) => {
     try {
+      
       const { subId, Origin, Destination,tripDate} = req.body;
       const user = await getUser(req);
   
