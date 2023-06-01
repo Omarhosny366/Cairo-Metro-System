@@ -27,8 +27,9 @@
             <li><a href="/resetPassword">Reset Password</a></li>
             <li><a href="/manage/stations">Manage Stations</a></li>
             <li><a href="/subscriptions">Get Zones</a></li>
+            <li><a href="/requests/refund">send refund requests</a></li>
+
             <li><a href="/manage/routes">Manage Routes</a></li>
-            <li><a href="manage/requests/senior">Manage Senior Request</a></li>
             
 
             <li><a href="/">Logout</a></li>

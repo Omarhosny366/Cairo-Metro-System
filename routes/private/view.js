@@ -111,6 +111,11 @@ app.get('/manage/requests/senior', async function(req, res) {
     const rides = await db.select('*').from('se_project.rides').where("userid", user.userid);
     return res.render('Tickets', { rides });
   });
+  app.get('/requests/refund', async function(req, res) {
+    const user = await getUser(req);
+    const subsription = await db.select('*').from('se_project.subsription').where("userid", user.userid);
+    return res.render('refund_request_send');
+  });
 
 
 };
