@@ -413,7 +413,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
           subid:subId,
           tripdate: tripDate,
         }).returning("*");
-        await db("se_project.subsription").where("userid",session.userid).decrement("nooftickets", 1);
+        await db("se_project.subsription").where("userid",user.userid).decrement("nooftickets", 1);
         await db("se_project.rides").insert({
           status:"pending",
           origin: Origin,

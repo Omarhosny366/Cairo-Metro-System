@@ -28,6 +28,7 @@
             <li><a href="/manage/stations">Manage Stations</a></li>
             <li><a href="/subscriptions">Get Zones</a></li>
             <li><a href="/manage/routes">Manage Routes</a></li>
+            <li><a href="/tickets">Buy tickets</a></li>
             
 
             <li><a href="/">Logout</a></li>
