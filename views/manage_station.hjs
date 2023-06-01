@@ -18,7 +18,7 @@
         </div>
 
        <div class="center">
-    <h1 style="text-align: right;">{MANAGE STATIONS}</h1>
+    <h1 style="text-align: center;">{MANAGE STATIONS}</h1>
     <form class="form-horizontal" style="width: 50%;">
         <h1 style="text-align: right;">Add Station</h1>
         <br/>
@@ -123,7 +123,7 @@
 <br/>
 <br/>
 
-        
+         <h1 style="text-align: center;">{STATIONS}</h1>
         <table class="table">
         <thead>
             <tr>

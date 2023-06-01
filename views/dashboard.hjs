@@ -21,9 +21,7 @@
         <nav class="navbar navbar-inverse" style="padding-left:130px;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
-            <li><a href="/stations_example">Station</a></li>
             <li><a href="/users">Users</a></li>
-            <li><a href="/users/add">Add Users</a></li>
             <li><a href="/resetPassword">Reset Password</a></li>
             <li><a href="/manage/stations">Manage Stations</a></li>
             <li><a href="/subscriptions">Get Zones</a></li>
