@@ -126,10 +126,21 @@ app.get('/manage/requests/senior', async function(req, res) {
       console.log(e.message);
       return res.status(500).send('Internal server error');
     }
+ 
+  });
   app.get('/prices', async function(req, res) {
     const user = await getUser(req);
     return res.render('checkprice');
   });
-
-  });
+  
+  app.get('/manage/zones', async function(req, res) {
+    try {
+      const user = await getUser(req);
+      const zones =await db.select('*').from('se_project.zones');
+      return res.render('manage_price',{zones});
+    } catch (e) {
+      console.log(e.message);
+      return res.status(500).send('Internal server error');
+    }
+});
 };

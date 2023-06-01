@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Manage Price</title>
+    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+    <link rel='stylesheet' href='/styles/style.css' />
+    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <script>
+  $(document).ready(function() {
+  $("#update").click(function() {
+    const price = $('#updateprice').val(); 
+    var id = $('#id').val();
+
+    if (!price) {
+      alert('New price is required');
+      return;
+    }
+
+    const data = {
+      price
+    };
+
+    $.ajax({
+      type: "PUT",
+      url: '/api/v1/zones/'+id,
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      success: function(serverResponse) {
+        if (serverResponse) {
+          alert('Successfully ');
+          location.reload();
+        }
+      },
+      error: function(errorResponse) {
+        if (errorResponse) {
+          alert(`error: ${errorResponse.responseText}`);
+        }
+      }
+    });
+  });
+});
+
+
+
+          </script>
+    <div>
+    <div>
+    <nav class="navbar navbar-inverse" style="padding-left:130px;">
+           <ul class="nav navbar-nav">
+        <li class="active"><a href="/">Home</a></li>
+        <li><a href="/">Logout</a></li>    
+        </ul>
+  </nav>
+    <div>
+          <div class="center">
+      <h1>Manage Price</h1>
+          <br/>
+    <form class="form-horizontal" style="width: 50%;">
+      <div class="form-group">
+          <label for="updateprice" class="col-sm-2 control-label">update price</label>
+          <div class="col-sm-10">
+              <input type="text" class="form-control" id="updateprice" name="updateprice" placeholder="updat eprice" value="">
+          </div>
+             </div>
+             <div class="form-group">
+            <label for="id" class="col-sm-2 control-label">ID</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="id" name="id" placeholder="ID" value="">
+            </div>
+        </div>
+      <div class="form-group">
+          <div class="col-sm-10 col-sm-offset-2">
+              <input id="update" name="update" type="button" value="update" class="btn btn-primary">
+              
+          </div>
+      </div>
+    </form>
+      <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Zone Type</th>
+            <th scope="col">Price</th>
+            </tr>
+            {{#zones}}
+            <tr>
+            <td>{{id}}</td>
+            <td>{{zonetype}}</td>
+            <td>{{price}}</td>
+            </tr> 
+            {{/zones}}
+        </thead>
+        </table>
+
+    </div>
+  </body>
+  </html>
+
+
+    
