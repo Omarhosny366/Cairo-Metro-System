@@ -1,70 +1,168 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Zones</title>
-    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
-    <link rel='stylesheet' href='/styles/style.css' />
-    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
-    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
-  </head>
-  <body>
-    <div>
-      <script>
-        fetch('/api/v1/zones')
-          .then(response => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error('Request failed with status: ' + response.status);
-            }
-          })
-          .then(data => {
-            // Handle the received zones data here
-            console.log(data);
-            // You can update your UI or perform any other actions with the data
-            const zonesTableBody = document.getElementById('zonesTableBody');
-            data.forEach(zone => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${zone.id}</td>
-                <td>${zone.zonetype}</td>
-                <td>${zone.price}</td>
-              `;
-              zonesTableBody.appendChild(row);
-            });
-            document.getElementById('zonesPlaceholder').style.display = 'none'; // Hide the placeholder message
-          })
-          .catch(error => {
-            // Handle the error here
-            console.log('Error:', error.message);
-            // You can display an error message or perform any other error handling
+<head>
+  <title>Zones</title>
+  <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+  <link rel='stylesheet' href='/styles/style.css' />
+  <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+  <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+</head>
+<body>
+  <div>
+    <script>
+      fetch('/api/v1/zones')
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Request failed with status: ' + response.status);
+          }
+        })
+        .then(data => {
+          // Handle the received zones data here
+          console.log(data);
+          // You can update your UI or perform any other actions with the data
+          const zonesTableBody = document.getElementById('zonesTableBody');
+          data.forEach(zone => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${zone.id}</td>
+              <td>${zone.zonetype}</td>
+              <td>${zone.price}</td>
+            `;
+            zonesTableBody.appendChild(row);
           });
-      </script>  
-      <div>
-        <nav class="navbar navbar-inverse" style="padding-left:130px;">
-          <ul class="nav navbar-nav">
-            <li><a href="/dashboard">Home</a></li>
-            <li class="active"><a href="/subscriptions">GetZones</a></li>
-            <li><a href="/">Logout</a></li>       
-          </ul>
-        </nav>
-        <br />
-      </div>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">id</th>
-            <th scope="col">Zone Type</th>
-            <th scope="col">Price</th>
-          </tr>
-        </thead>
-        <tbody id="zonesTableBody">
-          <!-- This is where the zones data will be dynamically added -->
-        </tbody>
-      </table>
-      <div id="zonesPlaceholder" style="display: block; text-align: center;">
-        Loading zones data...
-      </div>
+          document.getElementById('zonesPlaceholder').style.display = 'none'; // Hide the placeholder message
+        })
+        .catch(error => {
+          // Handle the error here
+          console.log('Error:', error.message);
+          // You can display an error message or perform any other error handling
+        });
+    </script> 
+    <script>
+      $(document).ready(function() {
+        $("#subscribe").click(function() {
+          const creditCardNumber = $('#creditCardNumber').val();
+          const holderName = $('#holderName').val();
+          const Payedamount = $('#Payedamount').val();
+          const subtype = $('#subtype').val();
+          const zoneId = $('#zoneId').val();
+
+       
+          const data = {
+            creditCardNumber,
+            holderName,
+            Payedamount,
+            subtype,
+            zoneId
+          };
+
+          $.ajax({
+            type: 'POST',
+            url: '/api/v1/payment/subscription',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function(serverResponse) {
+              if (serverResponse) {
+                alert('Subscription success');
+                location.reload();
+              }
+            },
+            error: function(errorResponse) {
+              if (errorResponse) {
+                alert(`Subscription error: ${errorResponse.responseText}`);
+              }
+            },
+          });
+        });
+      });
+    </script>
+    <div>
+      <nav class="navbar navbar-inverse" style="padding-left:130px;">
+        <ul class="nav navbar-nav">
+          <li><a href="/dashboard">Home</a></li>
+          <li class="active"><a href="/subscriptions">GetZones</a></li>
+          <li><a href="/">Logout</a></li>       
+        </ul>
+      </nav>
+      <br />
     </div>
-  </body>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">id</th>
+          <th scope="col">Zone Type</th>
+          <th scope="col">Price</th>
+        </tr>
+      </thead>
+      <tbody id="zonesTableBody">
+        <!-- This is where the zones data will be dynamically added -->
+      </tbody>
+    </table>
+    <div id="zonesPlaceholder" style="display: block; text-align: center;">
+      Loading zones data...
+    </div>
+  </div>
+  <div class="center">
+    <h1>Fill The Requirements</h1>
+  </div>
+  <div style="padding-left: 500px">
+    <form class="form-horizontal" style="width: 50%;">
+      <div class="form-group">
+        <label for="creditCardNumber" class="col-sm-2 control-label">Credit Card Number</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" id="creditCardNumber" name="creditCardNumber" placeholder="Credit Card Number" value="">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="holderName" class="col-sm-2 control-label">Holder Name</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" id="holderName" name="holderName" placeholder="Holder Name" value="">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="Payedamount" class="col-sm-2 control-label">Amount</label>
+        <div class="col-sm-10">
+          <input type="amount" class="form-control" id="Payedamount" name="Payedamount" placeholder="Amount" value="">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="subtype" class="col-sm-2 control-label">subType</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" id="subtype" name="subType" placeholder="subtype" value="">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="zoneId" class="col-sm-2 control-label">zone id</label>
+        <div class="col-sm-10">
+          <input type="integer" class="form-control" id="zoneId" name="zoneid" placeholder="zone id" value="">
+        </div>
+      </div>
+      <button id="subscribe" name="subscribe" type="button" value="subscribe" class="btn btn-primary">Subscribe</button>
+    </form>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">id</th>
+        <th scope="col">subtype</th>
+        <th scope="col">zoneid</th>
+        <th scope="col">userid</th>
+        <th scope="col">nooftickets</th>
+      </tr>
+    </thead>
+    <tbody id="ridesTableBody">
+      {{#subsription}}
+      <tr>
+        <td>{{id}}</td>
+        <td>{{subtype}}</td>
+        <td>{{zoneid}}</td>
+        <td>{{userid}}</td>
+        <td>{{nooftickets}}</td>
+      </tr> 
+      {{/subsription}}
+    </tbody>
+  </table>
+</body>
 </html>
