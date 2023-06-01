@@ -13,8 +13,8 @@
     $(document).ready(function(){    
       // Handle Registration Button Click
       $("#register").click(function() {
-       const firstname = $('#firstName').val();
-    const lastname = $('#lastName').val();
+    const firstname = $('#firstname').val();
+    const lastname = $('#lastname').val();
     const email = $('#email').val();
     const password = $('#password').val();
     const roleid = $('#roleid').val();
@@ -61,15 +61,15 @@
     <div style="padding-left: 500px">
     <form class="form-horizontal" style="width: 50%;">
       <div class="form-group">
-          <label for="firstName" class="col-sm-2 control-label">First Name</label>
+          <label for="firstname" class="col-sm-2 control-label">First Name</label>
           <div class="col-sm-10">
-              <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name" value="">
+              <input type="text" class="form-control" id="firstname" name="firstname" placeholder="First Name" value="">
           </div>
       </div>
       <div class="form-group">
-          <label for="lastName" class="col-sm-2 control-label">Last Name</label>
+          <label for="lastname" class="col-sm-2 control-label">Last Name</label>
           <div class="col-sm-10">
-              <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name" value="">
+              <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Last Name" value="">
           </div>
       </div>
       <div class="form-group">
