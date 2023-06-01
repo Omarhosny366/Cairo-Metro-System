@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Courses</title>
+    <title>Dashboard</title>
     <link rel='stylesheet' href='/styles/bootstrap.min.css' />
     <link rel='stylesheet' href='/styles/style.css' />
     <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
@@ -26,6 +26,7 @@
             <li><a href="/users/add">Add Users</a></li>
             <li><a href="/resetPassword">Reset Password</a></li>
             <li><a href="/manage/stations">Manage Stations</a></li>
+            <li><a href="/subscriptions">Get Zones</a></li>
             
 
             <li><a href="/">Logout</a></li>

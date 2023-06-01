@@ -128,7 +128,7 @@ module.exports = function (app) {
     
   const [transactionsId]=await db ("se_project.transactions").insert({
   userid: user.userid,
-  purchasediid: sub.id,
+  purchasediid:sub.id,
   amount:Payedamount,
   purchasetype:"subscription"
   }).returning("id");
