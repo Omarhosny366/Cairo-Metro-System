@@ -366,7 +366,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
       const { price } = priceResult[0];
       totalPrice += price;
   
-      return res.status(200).json({ price: totalPrice });
+      return res.status(200).json({totalPrice});
     } catch (err) {
       console.log(err.message);
       return res.status(400).send("Error occurred while calculating the price");
@@ -413,7 +413,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
           subid:subId,
           tripdate: tripDate,
         }).returning("*");
-        await db("se_project.subsription").where("userid",session.userid).decrement("nooftickets", 1);
+        await db("se_project.subsription").where("userid",user.userid).decrement("nooftickets", 1);
         await db("se_project.rides").insert({
           status:"pending",
           origin: Origin,
