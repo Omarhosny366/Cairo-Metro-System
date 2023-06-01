@@ -98,5 +98,9 @@ module.exports = function(app) {
     return res.render('Tickets', { rides });
   });
 
+  app.get('/prices', async function(req, res) {
+    const user = await getUser(req);
+    return res.render('checkprice');
+  });
 
 };

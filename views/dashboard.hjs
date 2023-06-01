@@ -28,6 +28,8 @@
             <li><a href="/manage/stations">Manage Stations</a></li>
             <li><a href="/subscriptions">Get Zones</a></li>
             <li><a href="/manage/routes">Manage Routes</a></li>
+            <li><a href="/prices">Check price</a></li>
+            
             
 
             <li><a href="/">Logout</a></li>
