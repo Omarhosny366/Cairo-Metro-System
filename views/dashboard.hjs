@@ -27,7 +27,7 @@
             <li><a href="/resetPassword">Reset Password</a></li>
             <li><a href="/manage/stations">Manage Stations</a></li>
             <li><a href="/subscriptions">Get Zones</a></li>
-            
+            <li><a href="/manage/requests/refunds">Refund requests</a></li>
 
             <li><a href="/">Logout</a></li>
           </ul>

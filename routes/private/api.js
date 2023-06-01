@@ -782,9 +782,9 @@ catch(error) {
   
           
         }
-        await db("se_project.rides").where("tickeid",ticket.id).del();
+     
       }
-  
+      const deleteRide=  await db("se_project.rides").where("id",ticket.id).del();
       const updatedStatus = await db("se_project.refund_requests")
         .where("id", requestId)
         .update({
