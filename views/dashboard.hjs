@@ -27,20 +27,14 @@
             <li><a href="/resetPassword">Reset Password</a></li>
             <li><a href="/manage/stations">Manage Stations</a></li>
             <li><a href="/subscriptions">Get Zones</a></li>
-<<<<<<< HEAD
+
             <li><a href="/manage/requests/refunds">Refund requests</a></li>
-=======
+
             <li><a href="/requests/refund">send refund requests</a></li>
             <li><a href="/manage/routes">Manage Routes</a></li>
-<<<<<<< HEAD
-            <li><a href="/prices">Check price</a></li>
-            
-=======
-            <li><a href="/manage/requests/senior">Manage senior request</a></li>
->>>>>>> 433e83d789182d5416fe2acc8c5edbe373e81e74
-            
->>>>>>> 6aa9f4057de33104e8c4cd0d3d6e833e705fa091
 
+            <li><a href="/prices">Check price</a></li>
+            <li><a href="/manage/requests/senior">Manage senior request</a></li>
             <li><a href="/">Logout</a></li>
           </ul>
        </nav>
