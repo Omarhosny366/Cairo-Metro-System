@@ -875,19 +875,17 @@ catch(error) {
       return res.status(400).send("Could not update zone price");
     }
    });
-
-   app.delete("/api/v1/stationn/:stationId", async function(req, res) {
+   app.delete("/api/v1/station/:stationId", async function(req, res) {
     try {
-       
       const user = await getUser(req);
-     if(!user)
-       return res.status(401).send("Internal server error");
-   
+      if (!user)
+        return res.status(401).send("Internal server error");
+  
       const Sid = req.params.stationId;
       const allRoutes = await db("se_project.routes").select("*");
       const StationToStationID = [];
       let newRoute = {};
-      let newRoute2={};
+      let newRoute2 = {};
       let stationIdVar;
       let stationIdVar2;
   
@@ -897,9 +895,6 @@ catch(error) {
         }
       });
   
-      // console.log(StationToStationID);
-      // console.log(allRoutes);
-  
       allRoutes.forEach(route => {
         if (route.tostationid == Sid) {
           StationToStationID.forEach(The_Id => {
@@ -907,7 +902,7 @@ catch(error) {
               //do nothing
             } else {
               stationIdVar = route.fromstationid;
-              stationIdVar2=The_Id;
+              stationIdVar2 = The_Id;
               let routeName = "hi" + route.fromstationid + The_Id;
               let routeName2 = "hi" + The_Id + route.fromstationid;
               newRoute = {
@@ -919,51 +914,64 @@ catch(error) {
                 routename: routeName2,
                 fromstationid: The_Id,
                 tostationid: route.fromstationid
-              
               };
             }
           });
         }
       });
   
-      // console.log(newRoute);
-      // console.log(newRoute2);
-  
       const deleteStation = await db("se_project.stations").where("id", Sid).del();
-      
-      const newRoutes = await db("se_project.routes").insert(newRoute);
-      const newRoutes2 = await db("se_project.routes").insert(newRoute2);
   
-      const routeResult = await db("se_project.routes")
-        .select("id")
-        .where("fromstationid", newRoute.fromstationid)
-        .andWhere("tostationid", newRoute.tostationid)
-        .first();
+      let newRoutes;
+      let newRoutes2;
+      if (newRoute.routename && newRoute.fromstationid && newRoute.tostationid) {
+        newRoutes = await db("se_project.routes").insert(newRoute);
+      }
+      if (newRoute2.routename && newRoute2.fromstationid && newRoute2.tostationid) {
+        newRoutes2 = await db("se_project.routes").insert(newRoute2);
+      }
+  
+      let routeResult;
+      if (newRoute.fromstationid && newRoute.tostationid) {
+        routeResult = await db("se_project.routes")
+          .select("id")
+          .where("fromstationid", newRoute.fromstationid)
+          .andWhere("tostationid", newRoute.tostationid)
+          .first();
+      }
   
       const newStationRoute = {
         stationid: stationIdVar,
-        routeid: routeResult.id
+        routeid: routeResult ? routeResult.id : null
       };
-     // console.log(newStationRoute);
-      
-      const routeResult2 = await db("se_project.routes")
-        .select("id")
-        .where("fromstationid", newRoute2.fromstationid)
-        .andWhere("tostationid", newRoute2.tostationid)
-        .first();
+  
+      let routeResult2;
+      if (newRoute2.fromstationid && newRoute2.tostationid) {
+        routeResult2 = await db("se_project.routes")
+          .select("id")
+          .where("fromstationid", newRoute2.fromstationid)
+          .andWhere("tostationid", newRoute2.tostationid)
+          .first();
+      }
   
       const newStationRoute2 = {
         stationid: stationIdVar2,
-        routeid: routeResult2.id
+        routeid: routeResult2 ? routeResult2.id : null
       };
-      //console.log(newStationRoute2);
   
-      const newStationRoutes = await db("se_project.stationroutes").insert(newStationRoute);
-      const newStationRoutes2 = await db("se_project.stationroutes").insert(newStationRoute2);
+      let newStationRoutes;
+      let newStationRoutes2;
+      if (newStationRoute.stationid && newStationRoute.routeid) {
+        newStationRoutes = await db("se_project.stationroutes").insert(newStationRoute);
+      }
+      if (newStationRoute2.stationid && newStationRoute2.routeid) {
+        newStationRoutes2 = await db("se_project.stationroutes").insert(newStationRoute2);
+      }
   
       return res.status(200).send("Done Deleting Station");
     } catch (e) {
       return res.status(400).send("Error deleting station: " + e);
     }
   });
+   
 }
