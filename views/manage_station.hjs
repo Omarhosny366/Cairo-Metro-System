@@ -228,7 +228,7 @@
           
             $.ajax({    
                 type: "delete",
-                url: '/api/v1/stationn/'+id,
+                url: '/api/v1/station/'+id,
                 contentType: 'application/json',
                 success: function(serverResponse) { 
                 if (serverResponse) {
