@@ -56,6 +56,20 @@ module.exports = function(app) {
   });
 
 
+// Register HTTP endpoint to render /courses page
+app.get('/manage/requests/senior', async function(req, res) {
+  try{ const user = await getUser(req);
+    const requests = await db.select('*').from('se_project.senior_requests').where("userid", user.userid);
+    return res.render('manage_requests_senior', {requests});
+ } catch (e) {
+   console.log(e.message);
+   return res.status(500).send('Internal server error');
+ }
+ });
+
+
+
+
   app.get('/resetPassword', async function(req, res) {
     try {
       const user = await getUser(req);
