@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>refund</title>
+    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+    <link rel='stylesheet' href='/styles/style.css' />
+    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+     <div>
+      <nav class="navbar navbar-inverse" style="padding-left:130px;">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="/">Home</a></li>
+          <li><a href="/">Logout</a></li>    
+        </ul>
+      </nav>
+      </div>
+    <script>
+      $(document).ready(function() {
+        $("#Submit").click(function() {
+          const nationalid = $('#nationalid').val();
+
+          if (!nationalid) {
+            alert('National ID is required');
+            return;
+          }
+          
+          const data = {
+            nationalid
+            };
+      
+          $.ajax({
+            type: "POST",
+            url: '/api/v1/senior/request',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function(serverResponse) {
+              if (serverResponse) {
+                alert('Request made!');
+               
+              }
+            },
+            error: function(errorResponse) {
+              if (errorResponse) {
+                alert(`Request not made: ${errorResponse.responseText}`);
+              }
+            }
+          });
+        });
+      });
+    </script>
+    
+      <div class="center">
+    <form class="form-horizontal" style="width: 50%;">
+        <h1 style="text-align: right;">Request Senior</h1>
+        <br/>
+   
+        <div class="form-group">
+            <label for="National ID" class="col-sm-2 control-label">National ID</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="nationalid" name="nationalid" placeholder="Enter National ID" value="">
+            </div>
+        </div>
+        </div>
+        <br/>
+        <br/>
+        
+        <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <input id="Submit" name="Submit" type="button" value="Submit Senior Request" class="btn btn-primary">
+            </div>
+        </div>
+    </form>
+</div>
+  </body>
+</html>
