@@ -158,13 +158,16 @@ app.get('/manage/requests/senior', async function(req, res) {
     }
 });
 
-<<<<<<< HEAD
 
 app.get('/resetpasswordAdmin', async function(req, res) {
   try {
     const user = await getUser(req);
     return res.render('resetpasswordAdmin');
-=======
+  } catch (e) {
+    console.log(e.message);
+    return res.status(500).send('Internal server error');
+  }
+});
 app.get('/rides/simulate', async function(req, res) {
   try {
     const user = await getUser(req);
@@ -172,16 +175,10 @@ app.get('/rides/simulate', async function(req, res) {
     const rides = await db.select('*').from('se_project.rides').where("userid", user.userid);
 
     return res.render('simulate',{stations,rides});
->>>>>>> 7ab3547c46cf181b05b30523ee2cfc3178e0479b
   } catch (e) {
     console.log(e.message);
     return res.status(500).send('Internal server error');
   }
-<<<<<<< HEAD
   
-}); 
-=======
-
 });
->>>>>>> 7ab3547c46cf181b05b30523ee2cfc3178e0479b
 };

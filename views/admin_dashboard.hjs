@@ -26,7 +26,7 @@
             <li><a href="/manage/requests/refunds">Manage Refund requests</a></li>
             <li><a href="/manage/routes">Manage Routes</a></li>
             <li><a href="/manage/requests/senior">Manage senior request</a></li>
-            <li><a href="/manage/zones">manage price</a></li>
+            <li><a href="/manage/zones">Manage price</a></li>
             <li><a href="/">Logout</a></li>
 
           </ul>
