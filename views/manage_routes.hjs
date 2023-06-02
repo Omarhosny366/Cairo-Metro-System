@@ -11,40 +11,46 @@
     <div>
       <nav class="navbar navbar-inverse" style="padding-left: 130px;">
         <ul class="nav navbar-nav">
-          <li class="active"><a href="/">Home</a></li>
+          <li class="active"><a href="/admin_dashboard">Home</a></li>
           <li><a href="/">Logout</a></li>
         </ul>
       </nav>
     </div>
 
     <div class="center">
-      <h1>Add route</h1>
+        <h1 style="text-align: center;"> Add route</h1>
       <br/>
-      <form class="form-horizontal" style="width: 50%;">
+     
         <div class="form-group">
           <label for="routename" class="col-sm-2 control-label">Route Name</label>
           <div class="col-sm-10">
             <input type="text" class="form-control" id="routename" name="routename" placeholder="Route Name" value="">
           </div>
         </div>
+        <br/>
+        <br/>
         <div class="form-group">
           <label for="stationtype" class="col-sm-2 control-label">Fromstationid</label>
           <div class="col-sm-10">
             <input type="text" class="form-control" id="fromstationid" name="fromstationid" placeholder="Fromstationid" value="">
           </div>
         </div>
+        <br/>
+        <br/>
         <div class="form-group">
           <label for="stationposition" class="col-sm-2 control-label">Tostationid</label>
           <div class="col-sm-10">
             <input type="text" class="form-control" id="tostationid" name="tostationid" placeholder="Tostationid" value="">
           </div>
         </div>
+        <br/>
+        <br/>
         <div class="form-group">
           <div class="col-sm-10 col-sm-offset-2">
             <input id="btnAddRoute" name="btnAddRoute" type="button" value="Add Route" class="btn btn-primary">
           </div>
         </div>
-      </form>
+      
     </div>  
     <br/>
     <br/>
@@ -53,31 +59,39 @@
 
     
      <div class="center">
-      <h1>update Route</h1>
+      <h1 style="text-align: center;">update Route</h1>
+      
       <br/>
+     
 <div class="form-group">
+  
   <label for="routenamee" class="col-sm-2 control-label">New Route Name</label>
   <div class="col-sm-10">
     <input type="text" class="form-control" id="routenamee" name="routenamee" placeholder="New Route Name" value="">
   </div>
 </div>
+ <br/>
+ <br/>
 <div class="form-group">
   <label for="id" class="col-sm-2 control-label">ID</label>
   <div class="col-sm-10">
     <input type="text" class="form-control" id="id" name="id" placeholder="ID" value="">
   </div>
 </div>  
+ <br/>
+ <br/>
           <div class="form-group">
           <div class="col-sm-10 col-sm-offset-2">
             <input id="btnUpdate" name="btnUpdate" type="button" value="Update route" class="btn btn-primary">
-      </form>
+    
     </div>
 
+ <br/>
+  <br/>
     <div class="center">
-    <form class="form-horizontal" style="width: 50%;">
-        <h1 style="text-align: right;">Delete Route</h1>
-        <br/>
-
+   
+        <h1 style="text-align: center;">Delete Route</h1>
+        
         <div class="form-group">
             <label for="iddd" class="col-sm-2 control-label">ID</label>
             <div class="col-sm-10">
@@ -88,10 +102,12 @@
         <br/>
         <br/>
 
+        
+
         <div class="form-group">
           <div class="col-sm-10 col-sm-offset-2">
             <input id="btnDel" name="btnDel" type="button" value="delete route " class="btn btn-primary">
-      </form>
+      
     </div>
     <br/>
     <br/>

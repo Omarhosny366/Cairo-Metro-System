@@ -20,13 +20,21 @@
             password,
           };
 
+
+
+
+
+
+
           $.ajax({
             type: "POST",
             url: '/api/v1/user/login',
             data,
             success: function(serverResponse) {
               if(serverResponse) {
+                
                 location.href = '/dashboard';
+                
               }
             },
             error: function(errorResponse) {

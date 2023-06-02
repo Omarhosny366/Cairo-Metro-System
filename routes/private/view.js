@@ -27,7 +27,15 @@ module.exports = function(app) {
   // Register HTTP endpoint to render /users page
   app.get('/dashboard', async function(req, res) {
     const user = await getUser(req);
+    const role = await db.select('roleid').from('se_project.users').where("id",user.userid);
+    if(user.role=='admin')
+    return res.render('admin_dashboard', user);
+    else
     return res.render('dashboard', user);
+  });
+  app.get('/admin_dashboard', async function(req, res) {
+    const user = await getUser(req);
+    return res.render('admin_dashboard', user);
   });
   
  // Register HTTP endpoint to render /users page
@@ -127,7 +135,7 @@ app.get('/manage/requests/senior', async function(req, res) {
     try {
       const user = await getUser(req);
       const request = await db.select('*').from('se_project.refund_requests');
-      return res.render('requests_refunds',{request});
+      return res.render('Manage_requests_refunds',{request});
     } catch (e) {
       console.log(e.message);
       return res.status(500).send('Internal server error');
@@ -149,4 +157,16 @@ app.get('/manage/requests/senior', async function(req, res) {
       return res.status(500).send('Internal server error');
     }
 });
+
+
+app.get('/resetpasswordAdmin', async function(req, res) {
+  try {
+    const user = await getUser(req);
+    return res.render('resetpasswordAdmin');
+  } catch (e) {
+    console.log(e.message);
+    return res.status(500).send('Internal server error');
+  }
+  
+}); 
 };
