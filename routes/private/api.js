@@ -366,6 +366,9 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
   
       const { price } = priceResult[0];
       totalPrice += price;
+      if(user.isSenior){
+        totalPrice*=0.4;
+      }
   
       return res.status(200).json({totalPrice});
     } catch (err) {
