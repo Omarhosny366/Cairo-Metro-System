@@ -26,7 +26,8 @@
             <li><a href="/manage/stations">Manage Stations</a></li>
             <li><a href="/subscriptions">Get Zones</a></li>
             <li><a href="/manage/requests/refunds">Manage Refund requests</a></li>
-            <li><a href="/requests/refund">send refund requests</a></li>
+            <li><a href="/requests/refund">Request Refund</a></li> 
+            <li><a href="/senior/request">Request Senior</a></li>
             <li><a href="/manage/routes">Manage Routes</a></li>
             <li><a href="/prices">Check price</a></li>
             <li><a href="/manage/requests/senior">Manage senior request</a></li>

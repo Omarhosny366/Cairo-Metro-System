@@ -219,7 +219,7 @@ module.exports = function (app) {
   });
   
   
-app.put("/api/v1/refund/:ticketId", async function (req, res) {
+app.post("/api/v1/refund/:ticketId", async function (req, res) {
   const ticketId = req.params.ticketId;
 
   try {
@@ -249,7 +249,6 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
     if (userSubscription) {
       // Check if there is a ticket associated with the user ID and subscription ID
       const associatedTicket = await db("se_project.tickets")
-        .where("userid", ticket.userId)
         .where("subid", userSubscription.id)
         .first();
 
@@ -259,6 +258,7 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
           ticketid: ticketId,
           status: "pending",
           userid:ticket.userid,
+          refundamount:0
           
         });
 
@@ -266,13 +266,14 @@ app.put("/api/v1/refund/:ticketId", async function (req, res) {
       }
     }else{
       const onlineticket = await db("se_project.tickets")
-      .where("userid", ticket.userId)
+      .where("userid", ticket.userid)
       .first();
        if(onlineticket){
         await db("se_project.refund_requests").insert({
           ticketid: ticketId,
           status: "pending",
           userid:ticket.userid,
+          refundamount:25
           
         });
         return res.status(200).send("Ticket refund requested");
