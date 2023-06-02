@@ -233,6 +233,14 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
       return res.status(404).send("Ticket not found");
     }
 
+    const [mount] = await db("se_project.transactions")
+    .select("*")
+    .where("purchasetype", "ticket")
+    .where("purchasediid", ticketId).returning("*");
+
+
+
+
     // Check if the ticket is for a future ride
     const currentDateTime = new Date();
     const ticketDateTime = new Date(ticket.tripDate);
@@ -273,7 +281,7 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
           ticketid: ticketId,
           status: "pending",
           userid:ticket.userid,
-          refundamount:25
+          refundamount:mount.amount
           
         });
         return res.status(200).send("Ticket refund requested");
@@ -282,8 +290,6 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
 
 
     }
-      
-    
 
     return res.status(400).send("Cannot refund ticket without a valid subscription");
   } catch (e) {
