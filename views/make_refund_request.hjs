@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>refund</title>
+    <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+    <link rel='stylesheet' href='/styles/style.css' />
+    <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+     <div>
+      <nav class="navbar navbar-inverse" style="padding-left:130px;">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="/">Home</a></li>
+          <li><a href="/">Logout</a></li>    
+        </ul>
+      </nav>
+      </div>
+    <script>
+      $(document).ready(function() {
+        $("#Refund").click(function() {
+          const ticketId = $('#ticketId').val();
+
+          if (!ticketId) {
+            alert('Ticket ID required');
+            return;
+          }
+
+          $.ajax({
+            type: "POST",
+            url: '/api/v1/refund/' + ticketId,
+            contentType: 'application/json',
+            success: function(serverResponse) {
+              if (serverResponse) {
+                alert('Ticket refunded');
+               
+              }
+            },
+            error: function(errorResponse) {
+              if (errorResponse) {
+                alert(`Ticket not refunded: ${errorResponse.responseText}`);
+              }
+            }
+          });
+        });
+      });
+    </script>
+    
+      <div class="center">
+        <h1>Refund Ticket</h1>
+        <br/>
+        <form class="form-horizontal" style="width: 50%;">
+          <div class="form-group">
+            <label for="Enter Ticket ID" class="col-sm-2 control-label">Enter Ticket ID</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="ticketId" name="ticketId" placeholder="TicketID" value="">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+              <input id="Refund" name="Refund" type="button" value="Refund" class="btn btn-primary">
+            </div>
+          </div>
+        </form>
+      </div>
+  </body>
+</html> 
+   
+
+
+
