@@ -149,4 +149,18 @@ app.get('/manage/requests/senior', async function(req, res) {
       return res.status(500).send('Internal server error');
     }
 });
+
+app.get('/rides/simulate', async function(req, res) {
+  try {
+    const user = await getUser(req);
+    const stations = await db.select('*').from('se_project.stations');
+    const rides = await db.select('*').from('se_project.rides').where("userid", user.userid);
+
+    return res.render('simulate',{stations,rides});
+  } catch (e) {
+    console.log(e.message);
+    return res.status(500).send('Internal server error');
+  }
+
+});
 };

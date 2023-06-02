@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simulate Ride</title>
+  <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+  <link rel='stylesheet' href='/styles/style.css' />
+  <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+  <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+</head>
+<body>
+  <div>
+    <div>
+      <nav class="navbar navbar-inverse" style="padding-left:130px;">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="/dashboard">Home</a></li>
+          <li><a href="/">Logout</a></li>    
+        </ul>
+      </nav>
+    </div>
+    
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">id</th>
+          <th scope="col">Status</th>
+          <th scope="col">Origin</th>
+          <th scope="col">Destination</th>
+          <th scope="col">userid</th>
+          <th scope="col">ticketid</th>
+          <th scope="col">tripDate</th>
+        </tr>
+      </thead>
+      <tbody id="ridesTableBody">
+        {{#rides}}
+        <tr>
+          <td>{{id}}</td>
+          <td>{{status}}</td>
+          <td>{{origin}}</td>
+          <td>{{destination}}</td>
+          <td>{{userid}}</td>
+          <td>{{ticketid}}</td>
+          <td>{{tripdate}}</td>
+        </tr> 
+        {{/rides}}
+      </tbody>
+    </table>
+  </div>
+  <div class="center">
+      <h1>Fill The Requirements</h1>
+    </div>
+    <div style="padding-left: 500px">
+      <form class="form-horizontal" style="width: 50%;">
+        
+        <div class="form-group">
+          <label for="tripDate" class="col-sm-2 control-label">Trip Date</label>
+          <div class="col-sm-10">
+            <input type="date" class="form-control" id="tripDate" name="tripDate" placeholder="Trip Date" value="">
+          </div>
+        </div>
+       
+      </form>
+    </div>
+<form class="form-horizontal">
+            <div class="form-group">
+                <label for="origin" class="col-sm-2 control-label">Origin</label>
+                <div class="col-sm-10">
+                    <div class="btn-group">
+                        <button id='origin' class="btn dropdown-toggle" data-toggle="dropdown">Stations <span class="caret"></span></button>
+                        <ul class="dropdown-menu">
+                            {{#stations}}
+                            <li><a class="origin-option" index="{{id}}">{{stationname}}</a></li>
+                            {{/stations}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+             <div class="form-group">
+                <label for="destination" class="col-sm-2 control-label">Destination</label>
+                <div class="col-sm-10">
+                    <div class="btn-group">
+                        <button id='destination' class="btn dropdown-toggle" data-toggle="dropdown">Stations <span class="caret"></span></button>
+                        <ul class="dropdown-menu">
+                            {{#stations}}
+                            <li><a class="destination-option" index="{{id}}">{{stationname}}</a></li>
+                            {{/stations}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+            <div class="col-sm-10 col-sm-offset-2">
+                <input id="simulate" name="simulate" type="button" value="Simulate Ride" class="btn btn-primary">
+            </div>
+        </div>
+
+        </form>
+          <script>
+            $(document).ready(function() {
+  $(".origin-option").click(function() {
+    var selectedOrigin = $(this).text();
+    $("#origin").text(selectedOrigin);
+  });
+
+  $(".destination-option").click(function() {
+    var selectedDestination = $(this).text();
+    $("#destination").text(selectedDestination);
+  });
+
+  $("#simulate").click(function() {
+    var origin = $("#origin").text();
+    var destination = $("#destination").text();
+    var tripDate = $("#tripDate").val();
+
+    $.ajax({
+      type: "PUT",
+      url: "/api/v1/ride/simulate",
+      data: JSON.stringify({ origin: origin, destination: destination, tripDate: tripDate }),
+      contentType: "application/json",
+      success: function(response) {
+        alert("Simulation was successful");
+        location.reload();
+      },
+      error: function(error) {
+        console.log("Error simulating ride:", error);
+      }
+    });
+  });
+});
+   
+  </script>
+</body>
+</html>
