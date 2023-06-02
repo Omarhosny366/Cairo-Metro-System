@@ -21,6 +21,7 @@
         <nav class="navbar navbar-inverse" style="padding-left:130px;">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/admin_dashboard">Home</a></li>
+            <li><a href="/users">View users</a></li>
             <li><a href="/resetpasswordAdmin">Reset Password</a></li>
             <li><a href="/manage/stations">Manage Stations</a></li>
             <li><a href="/manage/requests/refunds">Manage Refund requests</a></li>
@@ -32,7 +33,7 @@
           </ul>
        </nav>
       </div>
-      <p>Welcome {{firstname}}, you are logged in!</p>
+      <p>Welcome Mr.{{firstname}}, you are logged in as an admin!</p>
     </div>
   </body>
   </html>
