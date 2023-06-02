@@ -304,6 +304,11 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
     const destinationId = parseInt(req.params.destinationId);
   
     try {
+      const user = await getUser(req);
+  
+      if (!user) {
+        return res.status(401).send("Invalid session");
+      }
       // Fetch the origin station details
       let originStation = await db
         .select("*")
