@@ -44,6 +44,31 @@
         <form class="form-horizontal" style="width: 50%;">
             <h1 style="text-align: right;">Price</h1>
             <br/>
+             <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">id</th>
+          <th scope="col">Station name</th>
+          <th scope="col">Station type</th>
+          <th scope="col">Station Postion</th>
+          <th scope="col">Station Status</th>
+         
+        </tr>
+      </thead>
+      <tbody id="ridesTableBody">
+        {{#stations}}
+        <tr>
+          <td>{{id}}</td>
+          <td>{{stationname}}</td>
+          <td>{{stationtype}}</td>
+          <td>{{stationposition}}</td>
+          <td>{{stationstatus}}</td>
+          
+        </tr> 
+        {{/stations}}
+      </tbody>
+    </table>
+  </div>
             <div class="form-group">
                 <label for="originId" class="col-sm-2 control-label">Origin ID</label>
                 <div class="col-sm-10">

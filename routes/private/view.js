@@ -144,7 +144,8 @@ app.get('/manage/requests/senior', async function(req, res) {
   });
   app.get('/prices', async function(req, res) {
     const user = await getUser(req);
-    return res.render('checkprice');
+    const stations = await db.select('*').from('se_project.stations');
+    return res.render('checkprice',{stations});
   });
   
   app.get('/manage/zones', async function(req, res) {

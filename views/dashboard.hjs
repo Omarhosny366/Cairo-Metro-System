@@ -22,8 +22,7 @@
           <ul class="nav navbar-nav">
             <li class="active"><a href="/dashboard">Home</a></li>
             <li><a href="/resetPassword">Reset Password</a></li>
-            <li><a href="/subscriptions">Get Zones</a></li>
-            <li><a href="/subscriptions">Subscribe</a></li>
+            <li><a href="/subscriptions">Subscriptions</a></li>
             <li><a href="/rides/simulate">Simulate Ride</a></li>
             <li><a href="/requests/refund">Request Refund</a></li> 
             <li><a href="/senior/request">Request Senior</a></li>
