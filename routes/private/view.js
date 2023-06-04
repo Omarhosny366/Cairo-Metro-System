@@ -56,7 +56,10 @@ module.exports = function(app) {
   app.get('/manage/routes', async function(req, res) {
    try{ const user = await getUser(req);
     const routes = await db.select('*').from('se_project.routes');
-    return res.render('manage_routes', {routes});
+    const s='new';
+    const newstations = await db.select('*').from('se_project.stations').where("stationstatus",s);
+    const allstations = await db.select('*').from('se_project.stations');
+    return res.render('manage_routes', {routes,newstations,allstations});
   } catch (e) {
     console.log(e.message);
     return res.status(500).send('Internal server error');

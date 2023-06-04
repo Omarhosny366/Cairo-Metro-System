@@ -21,43 +21,60 @@
         <h1 style="text-align: center;"> Add route</h1>
       <br/>
      
-        <div class="form-group">
-          <label for="routename" class="col-sm-2 control-label">Route Name</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="routename" name="routename" placeholder="Route Name" value="">
-          </div>
-        </div>
-        <br/>
-        <br/>
-        <div class="form-group">
-          <label for="stationtype" class="col-sm-2 control-label">Fromstationid</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="fromstationid" name="fromstationid" placeholder="Fromstationid" value="">
-          </div>
-        </div>
-        <br/>
-        <br/>
-        <div class="form-group">
-          <label for="stationposition" class="col-sm-2 control-label">Tostationid</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="tostationid" name="tostationid" placeholder="Tostationid" value="">
-          </div>
-        </div>
-        <br/>
-        <br/>
-        <div class="form-group">
-          <div class="col-sm-10 col-sm-offset-2">
-            <input id="btnAddRoute" name="btnAddRoute" type="button" value="Add Route" class="btn btn-primary">
-          </div>
-        </div>
+
+  <div class="form-group">
+    <label for="routename" class="col-sm-2 control-label">Route Name</label>
+    <div class="col-sm-4"> <!-- Updated class: col-sm-4 -->
+      <input type="text" class="form-control" id="routename" name="routename" placeholder="Route Name" value="">
+    </div>
+  </div>
+  <br/>
+  <br/>
+  <label for="Fromstation" class="col-sm-2 control-label">Fromstation</label>
+  <div class="col-sm-4"> <!-- Updated class: col-sm-4 -->
+    <div class="btn-group">
+      <button id='origin' class="btn dropdown-toggle" data-toggle="dropdown">Stations <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        {{#newstations}}
+        <li><a class="origin-option" index="{{id}}">{{stationname}}</a></li>
+        {{/newstations}}
+      </ul>
+    </div>
+  </div>
+  <br/>
+  <br/>
+  <br/>
+  <label for="Tostation" class="col-sm-2 control-label">Tostation</label>
+  <div class="col-sm-4"> <!-- Updated class: col-sm-4 -->
+    <div class="btn-group">
+      <button id='destination' class="btn dropdown-toggle" data-toggle="dropdown">Stations <span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        {{#allstations}}
+        <li><a class="destination-option" index="{{id}}">{{stationname}}</a></li>
+        {{/allstations}}
+      </ul>
+    </div>
+  </div>
+  <br/>
+  <br/>
+  <br/>
+  <div class="form-group">
+    <div class="col-sm-4 col-sm-offset-2"> <!-- Updated class: col-sm-4 col-sm-offset-2 -->
+      <input id="btnAddRoute" name="btnAddRoute" type="button" value="Add Route" class="btn btn-primary">
+    </div>
+  </div>
+</div>
+
       
     </div>  
     <br/>
     <br/>
     <br/>
-
-
-    
+    <style>
+  .smaller-textbox {
+    width: 150px; /* Adjust the width as needed */
+  }
+</style>
     <br/>
    <table class="table">
   <thead>
@@ -92,22 +109,38 @@
 
 
     <script>
-      $(document).ready(function() {
-        $("#btnAddRoute").click(function() {
-          const routename = $('#routename').val();
-          const fromstationid = $('#fromstationid').val();
-          const tostationid = $('#tostationid').val();
+        $(document).ready(function() {
+  $(".origin-option").click(function() {
+    var originId = $(this).attr('index');
+    var originName = $(this).text();
+    console.log("Selected origin station:", originName, "with ID:", originId);
+    $("#origin").text(originName);
+    $("#origin").attr('data-id', originId);
+  });
 
-          if (!routename || !fromstationid || !tostationid ) {
-            alert('All fields are required');
-            return;
-          }
+  $(".destination-option").click(function() {
+    var destinationId = $(this).attr('index');
+    var destinationName = $(this).text();
+    console.log("Selected destination station:", destinationName, "with ID:", destinationId);
+    $("#destination").text(destinationName);
+    $("#destination").attr('data-id', destinationId);
+  });
 
-          const data = {
-            routename,
-            fromstationid,
-            tostationid
-          };
+  $("#btnAddRoute").click(function() {
+    const routename = $('#routename').val();
+    var originId = $("#origin").attr('data-id');
+    var destinationId = $("#destination").attr('data-id');
+
+    if (!routename || !originId || !destinationId) {
+      alert('All fields are required');
+      return;
+    }
+
+    const data = {
+      routename,
+      fromstationid: originId,
+      tostationid: destinationId
+    };
 
           $.ajax({
             type: "post",

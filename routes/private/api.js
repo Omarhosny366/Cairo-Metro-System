@@ -620,6 +620,12 @@ catch(error) {
     tostationid:   req.body.tostationid,
 
   };
+  const newRoute2 ={
+    routename:     req.body.routename+' return',
+    fromstationid: req.body.tostationid,
+    tostationid:   req.body.fromstationid,
+
+  };
   const checking = await db.select("*").from("se_project.stations")
   .where("id", req.body.fromstationid);
 
@@ -630,13 +636,28 @@ catch(error) {
   if (isEmpty(checking) || isEmpty(checking2)){
     return res.status(400).send("stations id's not exist")
   }
+  if(newRoute.fromstationid==newRoute.tostationid){
+    return res.status(400).send("can't create route between the same station")
+  }
   else if (checking && checking2) {
     try {
       const addedroutes = await db("se_project.routes")
         .insert(newRoute)
         .returning("*");
-    
-      return res.status(200).json(addedroutes);
+
+      const addedroutes2 = await db("se_project.routes")
+        .insert(newRoute2)
+        .returning("*");
+      
+        const newstationstatus = await db("se_project.stations")
+        .where("id", newRoute.fromstationid)
+        .update({
+          stationstatus: 'old',
+          
+        })
+        .returning("*");
+      return res.status(200).json({addedroutes,addedroutes2,newstationstatus});
+     
     } 
     catch (e) {
       console.log("error message", e.message);
