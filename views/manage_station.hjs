@@ -62,88 +62,42 @@
 <br/>
 <br/>
 
-<div class="center">
-    <form class="form-horizontal" style="width: 50%;">
-        <h1 style="text-align: right;">Update Station</h1>
-        <br/>
-   
-        <div class="form-group">
-            <label for="newstationname" class="col-sm-2 control-label">Station Name</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="newstationname" name="newstationname" placeholder="New Station Name" value="">
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <label for="id" class="col-sm-2 control-label">ID</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="id" name="id" placeholder="ID" value="">
-            </div>
-        </div>
-        <br/>
-        <br/>
-        
-        <div class="form-group">
-            <div class="col-sm-10 col-sm-offset-2">
-                <input id="Update" name="Update" type="button" value="Update Station" class="btn btn-primary">
-            </div>
-        </div>
-    </form>
-</div>
-<br/>
-<br/>
-<br/>
 
-<div class="center">
-    <form class="form-horizontal" style="width: 50%;">
-        <h1 style="text-align: right;">Delete Station</h1>
-        <br/>
-   
-        <div class="form-group">
-            <label for="idd" class="col-sm-2 control-label">ID</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="idd" name="idd" placeholder="ID" value="">
-            </div>
-        </div>
-        <br/>
-        <br/>
-        
-        <div class="form-group">
-            <div class="col-sm-10 col-sm-offset-2">
-                <input id="Delete" name="Delete" type="button" value="Delete Station" class="btn btn-primary">
-            </div>
-        </div>
-    </form>
-</div>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
+
 <br/>
 <br/>
 
          <h1 style="text-align: center;">{STATIONS}</h1>
-        <table class="table">
-        <thead>
-            <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Name</th>
-            <th scope="col">Type</th>
-            <th scope="col">Position</th>
-            <th scope="col">Status</th>
-            </tr>
-            {{#stations}}
-            <tr>
-            <td>{{id}}</td>
-            <td>{{stationname}}</td>
-            <td>{{stationtype}}</td>
-            <td>{{stationposition}}</td>
-            <td>{{stationstatus}}</td>
-            </tr> 
-            {{/stations}}
-        </thead>
-        </table>
+      <div class="table-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Type</th>
+        <th scope="col">Position</th>
+        <th scope="col">Status</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#stations}}
+      <tr>
+        <td>{{stationname}}</td>
+        <td>{{stationtype}}</td>
+        <td>{{stationposition}}</td>
+        <td>{{stationstatus}}</td>
+        <td>
+          <div>
+            <input type="text" id="newname{{id}}" placeholder="New Name">
+            <button id="updateBtn{{id}}" onclick="updateStationName({{id}})">Update Name</button>
+            <button id="deleteBtn{{id}}" onclick="deleteStation({{id}})">Delete</button>
+          </div>
+        </td>
+      </tr>
+      {{/stations}}
+    </tbody>
+  </table>
+</div>
 
         <script>
         $(document).ready(function() {
@@ -185,65 +139,57 @@
             });
         });
         </script>
-        <script>
-        $(document).ready(function() {
-            $("#Update").click(function() {
-            const stationname = $('#newstationname').val();
-            var id = $('#id').val();
+    <script>
+  function updateStationName(id) {
+    const newName = $('#newname' + id).val(); 
 
-            if (!stationname) {
-                alert('fields is required');
-                return;
-            }
-            const data2 = {
-                stationname
-            };
+    if (!newName) {
+      alert('New name is required');
+      return;
+    }
 
-            $.ajax({
-                type: "put",
-                url: '/api/v1/station/'+id,
-                data: JSON.stringify(data2),
-                contentType: 'application/json',
-                success: function(serverResponse) { 
-                if (serverResponse) {
-                    alert('Successfully updated station');
-                    location.reload();
-                }
-                },
-                error: function(errorResponse) {
-                if (errorResponse) {
-                    alert(`Error adding station: ${errorResponse.responseText}`);
-                }
-                }
-            });
-            });
-        });
-        </script>
-         <script>
-        $(document).ready(function() {
-         $("#Delete").click(function() {
-            console.log("removed");
-            var id = $('#idd').val();
+    const data = {
+      stationname: newName
+    };
 
-          
-            $.ajax({    
-                type: "delete",
-                url: '/api/v1/station/'+id,
-                contentType: 'application/json',
-                success: function(serverResponse) { 
-                if (serverResponse) {
-                    alert('Successfully delete station');
-                    location.reload();
-                }
-                },
-                error: function(errorResponse) {
-                if (errorResponse) {
-                    alert(`Error deleting station: ${errorResponse.responseText}`);
-                }
-                }
-            });
-            });
-        });
-        </script>
+    $.ajax({
+      type: "PUT",
+      url: '/api/v1/station/' + id,
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      success: function(serverResponse) {
+        if (serverResponse) {
+          alert('Successfully updated station');
+          location.reload();
+        }
+      },
+      error: function(errorResponse) {
+        if (errorResponse) {
+          alert(`Error updating station: ${errorResponse.responseText}`);
+        }
+      }
+    });
+  }
+
+  function deleteStation(id) {
+    $.ajax({
+      type: "DELETE",
+      url: '/api/v1/station/' + id,
+      contentType: 'application/json',
+      success: function(serverResponse) {
+        if (serverResponse) {
+          alert('Successfully deleted station');
+          location.reload();
+        }
+      },
+      error: function(errorResponse) {
+        if (errorResponse) {
+          alert(`Error deleting station: ${errorResponse.responseText}`);
+        }
+      }
+    });
+  }
+</script>
+
     </body>
     </html>

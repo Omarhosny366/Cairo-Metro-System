@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Senior Request</title>
+  <title>Refund Request</title>
   <link rel='stylesheet' href='/styles/bootstrap.min.css' />
   <link rel='stylesheet' href='/styles/style.css' />
   <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
@@ -19,60 +19,40 @@
 
 <div class="center">
   <h1>Decision</h1>
-  <br/>
-  <form class="form-horizontal" style="width: 50%;">
-    <div class="form-group">
-      <label for="routename" class="col-sm-2 control-label">ID Request</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" id="IDreq" name="IDreq" placeholder="ID Request" value="">
-      </div>
-    </div>
-    <br/>
-    <br/>
-    <div class="form-group">
-     <div class="form-group">
-          <div class="col-sm-offset-2 col-sm-5">
-            <input id="btnAccept" name="btnAccept" type="button" value="Accept" class="btn btn-primary">
-          </div>
-          <div class="col-sm-5">
-            <input id="btnReject" name="btnReject" type="button" value="Reject" class="btn btn-primary">
-          </div>
-        </div>
-        </div>
-      </form>
-  <br/>
-  <br/>
-  <br/>
   
+  <br/>
+  <br/>
   <table class="table">
-    <thead>
+  <thead>
     <tr>
-      <th scope="col">ID</th>
       <th scope="col">Status</th>
       <th scope="col">UserId</th>
       <th scope="col">refund amount</th>
       <th scope="col">ticket id</th>
+      <th scope="col">Action</th>
     </tr>
+  </thead>
+  <tbody id="requestsTableBody">
     {{#request}}
     <tr>
-      <td>{{id}}</td>
       <td>{{status}}</td>
       <td>{{userid}}</td>
       <td>{{refundamount}}</td>
       <td>{{ticketid}}</td>
+      <td>
+        <button class="acceptBtn" data-id="{{id}}">Accept</button>
+        <button class="rejectBtn" data-id="{{id}}">Reject</button>
+      </td>
     </tr>
     {{/request}}
-    </thead>
-    <tbody id="requestsTableBody">
-
-    </tbody>
-  </table>
+  </tbody>
+</table>
 </div>
 
 <script>
   $(document).ready(function() {
-    $("#btnAccept").click(function() {
-      const IDreq = $('#IDreq').val();
+    $(".acceptBtn").click(function() {
+      const IDreq = $(this).data("id");
 
       if (!IDreq) {
         alert('All fields are required');
@@ -102,8 +82,8 @@
       });
     });
 
-    $("#btnReject").click(function() {
-      const IDreq = $('#IDreq').val();
+    $(".rejectBtn").click(function() {
+      const IDreq = $(this).data("id");
 
       if (!IDreq) {
         alert('All fields are required');
@@ -134,5 +114,6 @@
     });
   });
 </script>
+
 </body>
 </html>

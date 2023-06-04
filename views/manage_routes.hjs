@@ -58,85 +58,37 @@
 
 
     
-     <div class="center">
-      <h1 style="text-align: center;">update Route</h1>
+    <br/>
+   <table class="table">
+  <thead>
+    <tr>
       
-      <br/>
-     
-<div class="form-group">
-  
-  <label for="routenamee" class="col-sm-2 control-label">New Route Name</label>
-  <div class="col-sm-10">
-    <input type="text" class="form-control" id="routenamee" name="routenamee" placeholder="New Route Name" value="">
-  </div>
-</div>
- <br/>
- <br/>
-<div class="form-group">
-  <label for="id" class="col-sm-2 control-label">ID</label>
-  <div class="col-sm-10">
-    <input type="text" class="form-control" id="id" name="id" placeholder="ID" value="">
-  </div>
-</div>  
- <br/>
- <br/>
-          <div class="form-group">
-          <div class="col-sm-10 col-sm-offset-2">
-            <input id="btnUpdate" name="btnUpdate" type="button" value="Update route" class="btn btn-primary">
-    
-    </div>
-
- <br/>
-  <br/>
-    <div class="center">
-   
-        <h1 style="text-align: center;">Delete Route</h1>
-        
-        <div class="form-group">
-            <label for="iddd" class="col-sm-2 control-label">ID</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="iddd" name="iddd" placeholder="ID" value="">
-            
-            </div>
+      <th scope="col">Name</th>
+      <th scope="col">FromstationId</th>
+      <th scope="col">TostationId</th>
+      <th scope="col">Action</th>
+    </tr>
+    {{#routes}}
+    <tr>
+      
+      <td>{{routename}}</td>
+      <td>{{fromstationid}}</td>
+      <td>{{tostationid}}</td>
+      <td>
+        <div>
+          <input type="text" class="newRouteName" placeholder="New Name">
+          <button class="updateBtn" data-id="{{id}}">Update</button>
+          <button class="deleteBtn" data-id="{{id}}">Delete</button>
         </div>
-        <br/>
-        <br/>
+      </td>
+    </tr> 
+    {{/routes}}
+  </thead>
+  <tbody id="routeTableBody">
+    
+  </tbody>
+</table>
 
-        
-
-        <div class="form-group">
-          <div class="col-sm-10 col-sm-offset-2">
-            <input id="btnDel" name="btnDel" type="button" value="delete route " class="btn btn-primary">
-      
-    </div>
-    <br/>
-    <br/>
-    <br/>
-    <br/>
-    <br/>
-    <br/>
-    <br/>
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Name</th>
-          <th scope="col">FromstationId</th>
-          <th scope="col">TostationId</th>
-        </tr>
-        {{#routes}}
-        <tr>
-          <td>{{id}}</td>
-          <td>{{routename}}</td>
-          <td>{{fromstationid}}</td>
-          <td>{{tostationid}}</td>
-        </tr> 
-        {{/routes}}
-      </thead>
-      <tbody id="routeTableBody">
-        <!-- Table rows will be dynamically added here -->
-      </tbody>
-    </table>
 
 
     <script>
@@ -177,46 +129,42 @@
         });
       });
     </script>
-      <script>
-      $(document).ready(function() {
-        $("#btnUpdate").click(function() {
-          const routename = $('#routenamee').val();
-          var id = $('#id').val();
-
-          if (!routename) {
-            alert('fields is required');
-            return;
-          }
-          const data2 = {
-            routename
-          };
-
-          $.ajax({
-            type: "put",
-            url: '/api/v1/route/'+id,
-            data: JSON.stringify(data2),
-            contentType: 'application/json',
-            success: function(serverResponse) { 
-              if (serverResponse) {
-                alert('Successfully updated route');
-                location.reload();
-              }
-            },
-            error: function(errorResponse) {
-              if (errorResponse) {
-                alert(`Error adding route: ${errorResponse.responseText}`);
-              }
-            }
-          });
-        });
-      });
-    </script>  
-
-   <script>
+     <script>
   $(document).ready(function() {
-    $("#btnDel").click(function() {
-      console.log("removed");
-      var id = $('#iddd').val();
+    $(".updateBtn").click(function() {
+      const id = $(this).data("id");
+      const newRouteName = $(this).siblings(".newRouteName").val();
+
+      if (!newRouteName) {
+        alert('Field is required');
+        return;
+      }
+
+      const data = {
+        routename: newRouteName
+      };
+
+      $.ajax({
+        type: "PUT",
+        url: '/api/v1/route/' + id,
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(serverResponse) { 
+          if (serverResponse) {
+            alert('Successfully updated route');
+            location.reload();
+          }
+        },
+        error: function(errorResponse) {
+          if (errorResponse) {
+            alert(`Error updating route: ${errorResponse.responseText}`);
+          }
+        }
+      });
+    });
+
+    $(".deleteBtn").click(function() {
+      const id = $(this).data("id");
 
       $.ajax({
         type: "DELETE",
@@ -237,6 +185,18 @@
     });
   });
 </script>
+<style>
+  
 
+  .updateBtn {
+    background-color: blue;
+    color: white;
+  }
+
+  .deleteBtn {
+    background-color: red;
+    color: white;
+  }
+</style>
   </body>
 </html>
