@@ -12,6 +12,7 @@
       <nav class="navbar navbar-inverse" style="padding-left:130px;">
         <ul class="nav navbar-nav">
           <li class="active"><a href="/dashboard">Home</a></li>
+             <li><a href="/tickets/purchase">Purchase Ticket</a></li>    
           <li><a href="/">Logout</a></li>    
         </ul>
       </nav>
@@ -45,6 +46,31 @@
         });
       });
     </script>
+     <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">id</th>
+        <th scope="col">Origin</th>
+        <th scope="col">destination</th>
+        <th scope="col">userid</th>
+        <th scope="col">subid</th>
+        <th scope="col">tripDate</th>
+        
+      </tr>
+    </thead>
+    <tbody id="ridesTableBody">
+      {{#tickets}}
+      <tr>
+        <td>{{id}}</td>
+        <td>{{origin}}</td>
+        <td>{{destination}}</td>
+        <td>{{userid}}</td>
+        <td>{{subid}}</td>
+         <td>{{tripdate}}</td>
+      </tr> 
+      {{/tickets}}
+    </tbody>
+  </table>
     
       <div class="center">
         <h1>Refund Ticket</h1>

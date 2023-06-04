@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>View Refund Request/</title>
+  <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+  <link rel='stylesheet' href='/styles/style.css' />
+  <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+  <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+  <div>
+    <div>
+      <nav class="navbar navbar-inverse" style="padding-left:130px;">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="/dashboard">Home</a></li>
+          <li><a href="/">Logout</a></li>    
+        </ul>
+      </nav>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">id</th>
+          <th scope="col">Status</th>
+          <th scope="col">userid</th>
+           <th scope="col">Refund Amount</th>
+          <th scope="col">ticketid</th>
+          
+        </tr>
+      </thead>
+      <tbody id="ridesTableBody">
+        {{#refund}}
+        <tr>
+          <td>{{id}}</td>
+          <td>{{status}}</td>
+          <td>{{userid}}</td>
+           <td>{{refundamount}}</td>
+          <td>{{ticketid}}</td>
+          
+        </tr> 
+        {{/refund}}
+      </tbody>
+    </table>
+  </div>
+  
+  </body>
+</html>
