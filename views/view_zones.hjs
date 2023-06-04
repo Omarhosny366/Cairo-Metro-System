@@ -142,27 +142,6 @@
       <button id="subscribe" name="subscribe" type="button" value="subscribe" class="btn btn-primary">Subscribe</button>
     </form>
   </div>
-  <table class="table">
-    <thead>
-      <tr>
-        <th scope="col">id</th>
-        <th scope="col">subtype</th>
-        <th scope="col">zoneid</th>
-        <th scope="col">userid</th>
-        <th scope="col">nooftickets</th>
-      </tr>
-    </thead>
-    <tbody id="ridesTableBody">
-      {{#subsription}}
-      <tr>
-        <td>{{id}}</td>
-        <td>{{subtype}}</td>
-        <td>{{zoneid}}</td>
-        <td>{{userid}}</td>
-        <td>{{nooftickets}}</td>
-      </tr> 
-      {{/subsription}}
-    </tbody>
-  </table>
+  
 </body>
 </html>

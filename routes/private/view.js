@@ -101,9 +101,20 @@ app.get('/manage/requests/senior', async function(req, res) {
 
   });
 
-
-
   app.get('/subscriptions', async function(req, res) {
+    try {
+      const user = await getUser(req);
+      const subsription = await db.select('*').from('se_project.subsription').where("userid", user.userid);
+      return res.render('viewsub',{subsription});
+    } catch (e) {
+      console.log(e.message);
+      return res.status(500).send('Internal server error');
+    }
+  });
+
+
+
+  app.get('/subscriptions/purchase', async function(req, res) {
     try {
       const user = await getUser(req);
       const subsription = await db.select('*').from('se_project.subsription').where("userid", user.userid);
@@ -114,15 +125,15 @@ app.get('/manage/requests/senior', async function(req, res) {
     }
   });
 
-  app.get('/tickets', async function(req, res) {
+  app.get('/tickets/purchase', async function(req, res) {
     const user = await getUser(req);
     const rides = await db.select('*').from('se_project.rides').where("userid", user.userid);
     return res.render('Tickets', { rides });
   });
-  app.get('/requests/refund', async function(req, res) {
+  app.get('/tickets', async function(req, res) {
     const user = await getUser(req);
-    const subsription = await db.select('*').from('se_project.subsription').where("userid", user.userid);
-    return res.render('make_refund_request');
+    const tickets = await db.select('*').from('se_project.tickets').where("userid", user.userid);
+    return res.render('make_refund_request',{tickets});
   });
   app.get('/senior/request', async function(req, res) {
     const user = await getUser(req);
@@ -176,6 +187,30 @@ app.get('/rides/simulate', async function(req, res) {
     const rides = await db.select('*').from('se_project.rides').where("userid", user.userid);
 
     return res.render('simulate',{stations,rides});
+  } catch (e) {
+    console.log(e.message);
+    return res.status(500).send('Internal server error');
+  }
+  
+});
+app.get('/rides', async function(req, res) {
+  try {
+    const user = await getUser(req);
+  
+    const rides = await db.select('*').from('se_project.rides').where("userid", user.userid);
+
+    return res.render('viewrides',{rides});
+  } catch (e) {
+    console.log(e.message);
+    return res.status(500).send('Internal server error');
+  }
+  
+});
+app.get('/requests/refund', async function(req, res) {
+  try {
+    const user = await getUser(req);
+    const refund = await db.select('*').from('se_project.refund_requests').where("userid", user.userid);
+    return res.render('view_refund',{refund});
   } catch (e) {
     console.log(e.message);
     return res.status(500).send('Internal server error');

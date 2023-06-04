@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Subscription</title>
+  <link rel='stylesheet' href='/styles/bootstrap.min.css' />
+  <link rel='stylesheet' href='/styles/style.css' />
+  <script src="/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+  <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+</head>
+<body>
+  <div>
+      <nav class="navbar navbar-inverse" style="padding-left:130px;">
+        <ul class="nav navbar-nav">
+          <li><a href="/dashboard">Home</a></li>
+           <li><a href="/subscriptions/purchase"> Purchase Subscriptions</a></li>
+          <li><a href="/">Logout</a></li>       
+        </ul>
+      </nav>
+      <br />
+    </div>
+     <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">id</th>
+        <th scope="col">subtype</th>
+        <th scope="col">zoneid</th>
+        <th scope="col">userid</th>
+        <th scope="col">nooftickets</th>
+      </tr>
+    </thead>
+    <tbody id="ridesTableBody">
+      {{#subsription}}
+      <tr>
+        <td>{{id}}</td>
+        <td>{{subtype}}</td>
+        <td>{{zoneid}}</td>
+        <td>{{userid}}</td>
+        <td>{{nooftickets}}</td>
+      </tr> 
+      {{/subsription}}
+    </tbody>
+  </table>
+</body>
+</html>
