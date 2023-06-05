@@ -21,7 +21,7 @@
      <table class="table">
     <thead>
       <tr>
-        <th scope="col">id</th>
+       
         <th scope="col">subtype</th>
         <th scope="col">zoneid</th>
         <th scope="col">userid</th>
@@ -31,7 +31,7 @@
     <tbody id="ridesTableBody">
       {{#subsription}}
       <tr>
-        <td>{{id}}</td>
+      
         <td>{{subtype}}</td>
         <td>{{zoneid}}</td>
         <td>{{userid}}</td>

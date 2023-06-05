@@ -21,7 +21,7 @@
     <table class="table">
       <thead>
         <tr>
-          <th scope="col">id</th>
+         
           <th scope="col">Status</th>
           <th scope="col">userid</th>
            <th scope="col">Refund Amount</th>
@@ -32,7 +32,7 @@
       <tbody id="ridesTableBody">
         {{#refund}}
         <tr>
-          <td>{{id}}</td>
+          
           <td>{{status}}</td>
           <td>{{userid}}</td>
            <td>{{refundamount}}</td>

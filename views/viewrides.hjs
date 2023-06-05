@@ -22,7 +22,7 @@
     <table class="table">
       <thead>
         <tr>
-          <th scope="col">id</th>
+         
           <th scope="col">Status</th>
           <th scope="col">Origin</th>
           <th scope="col">Destination</th>
@@ -34,7 +34,7 @@
       <tbody id="ridesTableBody">
         {{#rides}}
         <tr>
-          <td>{{id}}</td>
+          
           <td>{{status}}</td>
           <td>{{origin}}</td>
           <td>{{destination}}</td>

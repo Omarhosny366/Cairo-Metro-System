@@ -330,8 +330,8 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
       let totalPrice = 0;
       let currentStationId = originId;
       let destinationStationId = destinationId;
-      let currentStationType = originStation.stationtype;
-      let destinationStationType = destinationStation.stationtype;
+      let currentStationType = originStation.stationposition;
+      let destinationStationType = destinationStation.stationposition;
       let counter = 1;
   
       while (currentStationId <destinationStationId) {
@@ -361,8 +361,8 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
           return res.status(400).send("Invalid origin or destination station");
         }
   
-        currentStationType = originStation.stationtype;
-        counter += 1;
+        currentStationType = originStation.stationposition;
+       
       }
   
       const priceResult = await db

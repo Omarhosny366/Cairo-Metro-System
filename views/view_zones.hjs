@@ -26,7 +26,7 @@
           data.forEach(zone => {
             const row = document.createElement('tr');
             row.innerHTML = `
-              <td>${zone.id}</td>
+              
               <td>${zone.zonetype}</td>
               <td>${zone.price}</td>
             `;
@@ -91,7 +91,7 @@
     <table class="table">
       <thead>
         <tr>
-          <th scope="col">id</th>
+          
           <th scope="col">Zone Type</th>
           <th scope="col">Price</th>
         </tr>
