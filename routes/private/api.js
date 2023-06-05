@@ -512,30 +512,17 @@ catch(error) {
       }
 
 
-      const ticket = await db("se_project.tickets")
-        .select("id")
-        .where("userid", user.userid)///////write user session here//////
-        .first();
-
-      if (!ticket) {
-        return res.status(400).json({ error: "No ticket found for the user" });
-      }
-
-      const ticketId = ticket.id;
 
 
-      const ride = await db("se_project.rides")
-        .insert({
-          status: "completed",
-          origin: origin,
-          destination: destination,
-          userid: user.userid,///////write user session here//////
-          ticketid: ticketId,
-          tripdate: tripDate,
-        })
-        .returning("*");
+      const ride = await db("se_project.rides").where("origin",origin)
+      .where("destination",destination).
+      where("tripdate",tripDate).
+      where("userid",user.userid)
+        .update({
+          status: "completed",});
+       
 
-      return res.status(200).json(ride);
+      return res.status(200).json("ride completed succesfully ");
     } catch (err) {
       console.log("Error:", err);
       return res.status(500).json({ error: "Failed to simulate ride" });
