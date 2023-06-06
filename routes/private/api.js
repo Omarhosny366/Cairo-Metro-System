@@ -116,7 +116,13 @@ module.exports = function (app) {
     return res.status(400).send("Invalid subscription type");
   }
   
-  
+  const existingSubscription = await db("se_project.subsription")
+  .where("userid", user.userid)
+  .first();
+
+if (existingSubscription) {
+  return res.status(400).send("You already have a subscription");
+}
   
   
   const [sub] =await db ("se_project.subsription").insert({
