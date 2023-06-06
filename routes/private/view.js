@@ -57,9 +57,10 @@ module.exports = function(app) {
    try{ const user = await getUser(req);
     const routes = await db.select('*').from('se_project.routes');
     const s='new';
+    const o='old';
     const newstations = await db.select('*').from('se_project.stations').where("stationstatus",s);
-    const allstations = await db.select('*').from('se_project.stations');
-    return res.render('manage_routes', {routes,newstations,allstations});
+    const oldstations = await db.select('*').from('se_project.stations').where("stationstatus",o);
+    return res.render('manage_routes', {routes,newstations,oldstations});
   } catch (e) {
     console.log(e.message);
     return res.status(500).send('Internal server error');

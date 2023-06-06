@@ -38,12 +38,13 @@
 </div>
 
      <div class="center">
-      <img src="images/metro.jpg" class="enlarged-image">
+      <img src="images/logo.jpg" class="enlarged-image">
+      
     </div>
     <style>
   .enlarged-image {
-    width: 1080px; /* Adjust the width as needed */
-    height: auto; /* Maintain aspect ratio */
+    width: 200; /* Adjust the width as needed */
+    height: 100; /* Maintain aspect ratio */
   }
 </style>
   </body>
