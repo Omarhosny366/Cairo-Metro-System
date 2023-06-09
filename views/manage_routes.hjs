@@ -154,6 +154,7 @@
               if (serverResponse) {
                 alert('Successfully added route');
                 location.reload();
+                
               }
             },
             error: function(errorResponse) {
