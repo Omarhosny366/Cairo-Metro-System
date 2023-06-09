@@ -68,8 +68,6 @@
           <th scope="col">Status</th>
           <th scope="col">Origin</th>
           <th scope="col">Destination</th>
-          <th scope="col">userid</th>
-          <th scope="col">ticketid</th>
           <th scope="col">tripDate</th>
         </tr>
       </thead>
@@ -80,8 +78,6 @@
           <td>{{status}}</td>
           <td>{{origin}}</td>
           <td>{{destination}}</td>
-          <td>{{userid}}</td>
-          <td>{{ticketid}}</td>
           <td>{{tripdate}}</td>
         </tr> 
         {{/rides}}
