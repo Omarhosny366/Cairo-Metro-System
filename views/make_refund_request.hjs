@@ -20,8 +20,10 @@
 <table class="table">
   <thead>
     <tr>
+      <th scope="col">Ticket Id</th>
       <th scope="col">Origin</th>
       <th scope="col">Destination</th>
+        
       <th scope="col">Trip Date</th>
       <th scope="col">Action</th>
     </tr>
@@ -29,6 +31,7 @@
   <tbody id="ridesTableBody">
     {{#tickets}}
     <tr>
+      <td>{{id}}</td>
       <td>{{origin}}</td>
       <td>{{destination}}</td>
       <td>{{tripdate}}</td>
