@@ -23,7 +23,6 @@
       <tr>
        
         <th scope="col">subtype</th>
-        <th scope="col">zoneid</th>
         <th scope="col">userid</th>
         <th scope="col">nooftickets</th>
       </tr>
@@ -33,7 +32,6 @@
       <tr>
       
         <td>{{subtype}}</td>
-        <td>{{zoneid}}</td>
         <td>{{userid}}</td>
         <td>{{nooftickets}}</td>
       </tr> 
