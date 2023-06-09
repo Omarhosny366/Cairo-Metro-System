@@ -47,9 +47,21 @@
           const holderName = $('#holderName').val();
           const Payedamount = $('#Payedamount').val();
           const subtype = $('#subtype').val();
-          const zoneId = $('#zoneId').val();
+          const zone = $('#zonetype').val();
+            var zoneId = null;
 
-       
+            {{#zones}}
+            if ("{{zonetype}}" === zone) {
+                zoneId = {{id}};
+            }
+          
+            {{/zones}}
+            
+            if (zoneId === null) {
+                alert("zone not found");
+                return;
+            }
+         
           const data = {
             creditCardNumber,
             holderName,
@@ -136,7 +148,7 @@
       <div class="form-group">
         <label for="zoneId" class="col-sm-2 control-label">zone id</label>
         <div class="col-sm-10">
-          <input type="integer" class="form-control" id="zoneId" name="zoneid" placeholder="zone id" value="">
+          <input type="text" class="form-control" id="zonetype" name="zonetype" placeholder="zone " value="">
         </div>
       </div>
       <button id="subscribe" name="subscribe" type="button" value="subscribe" class="btn btn-primary">Subscribe</button>
