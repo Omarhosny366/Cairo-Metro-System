@@ -639,11 +639,11 @@ catch(error) {
   }
   else if (checking && checking2) {
     try {
-      const addedroutes = await db("se_project.routes")
+      const [addedroutes] = await db("se_project.routes")
         .insert(newRoute)
         .returning("*");
 
-      const addedroutes2 = await db("se_project.routes")
+      const [addedroutes2] = await db("se_project.routes")
         .insert(newRoute2)
         .returning("*");
       
@@ -652,9 +652,22 @@ catch(error) {
         .update({
           stationstatus: 'old',
           
+        
         })
         .returning("*");
-      return res.status(200).json({addedroutes,addedroutes2,newstationstatus});
+
+        const newstationroute = await db("se_project.stationroutes")
+        .insert({
+          stationid : newRoute.fromstationid,
+          routeid : addedroutes.id
+        });
+        const newstationroute2 = await db("se_project.stationroutes")
+        .insert({
+          stationid : newRoute2.fromstationid,
+          routeid : addedroutes2.id
+        });
+
+      return res.status(200).json({addedroutes,addedroutes2,newstationstatus,newstationroute,newstationroute2});
      
     } 
     catch (e) {
@@ -731,6 +744,7 @@ catch(error) {
       }
   
       await db("se_project.routes").where("id", routeId).del();
+     
   
       return res.status(200).json({ message: "Route deleted successfully" });
     } catch (err) {
