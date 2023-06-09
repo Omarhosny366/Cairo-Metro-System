@@ -27,7 +27,6 @@
     <tr>
       
       <th scope="col">Status</th>
-      <th scope="col">UserId</th>
       <th scope="col">NationalId</th>
       <th scope="col">Action</th>
     </tr>
@@ -35,7 +34,6 @@
     <tr>
       
       <td>{{status}}</td>
-      <td>{{userid}}</td>
       <td>{{nationalid}}</td>
       <td>
         <button class="acceptBtn" data-id="{{id}}">Accept</button>
@@ -45,7 +43,7 @@
     {{/requests}}
   </thead>
   <tbody id="requestsTableBody">
-    <!-- Table rows will be dynamically added here -->
+    
   </tbody>
 </table>
 </div>
