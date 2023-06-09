@@ -21,7 +21,7 @@
      <table class="table">
     <thead>
       <tr>
-       
+        <th scope="col">Sub ID</th>
         <th scope="col">subtype</th>
         <th scope="col">userid</th>
         <th scope="col">nooftickets</th>
@@ -30,7 +30,7 @@
     <tbody id="ridesTableBody">
       {{#subsription}}
       <tr>
-      
+      <td>{{id}}</td>
         <td>{{subtype}}</td>
         <td>{{userid}}</td>
         <td>{{nooftickets}}</td>
