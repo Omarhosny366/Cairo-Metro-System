@@ -629,8 +629,25 @@ catch(error) {
 
   const checking2 = await db.select("*").from("se_project.stations")
   .where("id", req.body.tostationid);
-  
 
+  const checking3 =await db.select("*").from("se_project.routes")
+  .where("fromstationid", req.body.fromstationid)
+  .andWhere("tostationid",req.body.tostationid);
+  
+  const checking4 =await db.select("*").from("se_project.routes")
+  .where("routename", req.body.routename);
+
+  const checking5 =await db.select("*").from("se_project.routes")
+  .where("routename", req.body.routename+' return');
+
+
+   if (!isEmpty(checking4) || !isEmpty(checking5)){
+    return res.status(400).send("route names already used")
+  }
+
+  if (!isEmpty(checking3)){
+    return res.status(400).send("route already exist");
+  }
   if (isEmpty(checking) || isEmpty(checking2)){
     return res.status(400).send("stations id's not exist")
   }
@@ -722,7 +739,21 @@ catch(error) {
       const toStationRoutes = await db("se_project.routes")
       .select("tostationid")
       .where("id", routeId);
-      if (fromStationRoutes.length !=0 && toStationRoutes.length !=0 ) {
+
+      const checker = await db("se_project.routes")
+      .select("*")
+      .where("fromstationid", fromstationid);
+      if(checker){
+        if (fromStationRoutes.length !=0 && toStationRoutes.length !=0 ) {
+          await db("se_project.stations").where("id", fromstationid).update({
+            stationposition: "start",
+          });
+          await db("se_project.stations").where("id", tostationid).update({
+            stationposition: "end",
+          });
+      }}
+      else if(!checker){
+       if (fromStationRoutes.length !=0 && toStationRoutes.length !=0 ) {
         await db("se_project.stations").where("id", fromstationid).update({
           stationstatus: "new",
           stationposition: "start",
@@ -742,10 +773,8 @@ catch(error) {
           stationposition: "end",
         });
       }
-  
+    }
       await db("se_project.routes").where("id", routeId).del();
-     
-  
       return res.status(200).json({ message: "Route deleted successfully" });
     } catch (err) {
       console.log("Error:", err);
