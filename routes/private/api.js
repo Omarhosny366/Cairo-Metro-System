@@ -497,12 +497,7 @@ catch(error) {
 }});
 
   
-  //insert command table senior request - nationalid and user id i retrieved 
-//add a pending status
-//insert into table-requests(status,userid,nationalid)
-//values(add values)
-//return star -----> checkkk <-----
-//try and catch --- console.log err.message(result.ststus 500)
+  
   app.put("/api/v1/ride/simulate", async (req, res) => {
     try {
       const { origin, destination, tripDate } = req.body;
