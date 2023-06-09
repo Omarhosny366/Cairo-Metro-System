@@ -26,9 +26,9 @@
   <thead>
     <tr>
       <th scope="col">Status</th>
-      <th scope="col">UserId</th>
+     
       <th scope="col">refund amount</th>
-      <th scope="col">ticket id</th>
+     
       <th scope="col">Action</th>
     </tr>
   </thead>
@@ -36,9 +36,8 @@
     {{#request}}
     <tr>
       <td>{{status}}</td>
-      <td>{{userid}}</td>
       <td>{{refundamount}}</td>
-      <td>{{ticketid}}</td>
+      
       <td>
         <button class="acceptBtn" data-id="{{id}}">Accept</button>
         <button class="rejectBtn" data-id="{{id}}">Reject</button>

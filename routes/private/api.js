@@ -716,14 +716,12 @@ catch(error) {
   }
   });
   
-  
   app.delete("/api/v1/route/:routeId", async (req, res) => {
     try {
-       
       const user = await getUser(req);
-     if(!user)
-       return res.status(401).send("Internal server error");
-   
+      if (!user)
+        return res.status(401).send("Internal server error");
+  
       const routeId = parseInt(req.params.routeId);
   
       const route = await db("se_project.routes").where("id", routeId).first();
@@ -733,48 +731,48 @@ catch(error) {
   
       const { fromstationid, tostationid } = route;
   
-      const fromStationRoutes = await db("se_project.routes")
-      .select("fromstationid")
-      .where("id", routeId);
-      const toStationRoutes = await db("se_project.routes")
-      .select("tostationid")
-      .where("id", routeId);
-
-      const checker = await db("se_project.routes")
-      .select("*")
-      .where("fromstationid", fromstationid);
-      if(checker){
-        if (fromStationRoutes.length !=0 && toStationRoutes.length !=0 ) {
-          await db("se_project.stations").where("id", fromstationid).update({
+      const fromStationRoutes = await db("se_project.stationroutes")
+        .select("id")
+        .where("stationid", fromstationid);
+      const toStationRoutes = await db("se_project.stationroutes")
+        .select("id")
+        .where("stationid", tostationid);
+  
+      await db("se_project.routes").where("id", routeId).del();
+  
+      const checker = await db("se_project.stationroutes")
+        .select("*")
+        .where("stationid", fromstationid);
+      const checker2 = await db("se_project.stationroutes")
+        .select("*")
+        .where("stationid", tostationid);
+  
+      if (isEmpty(checker) && isEmpty(checker2)) {
+        await db("se_project.stations")
+          .where("id", fromstationid)
+          .update({
+            stationstatus: "new",
             stationposition: "start",
           });
-          await db("se_project.stations").where("id", tostationid).update({
+        await db("se_project.stations")
+          .where("id", tostationid)
+          .update({
+            stationstatus: "new",
             stationposition: "end",
           });
-      }}
-      else if(!checker){
-       if (fromStationRoutes.length !=0 && toStationRoutes.length !=0 ) {
-        await db("se_project.stations").where("id", fromstationid).update({
-          stationstatus: "new",
-          stationposition: "start",
-        });
-        await db("se_project.stations").where("id", tostationid).update({
-          stationstatus: "new",
-          stationposition: "end",
-        });
-      } else if (fromStationRoutes.length != 0) {
-        await db("se_project.stations").where("id", fromstationid).update({
-          stationstatus: "new",
-          stationposition: "start",
-        });
-      } else if (toStationRoutes.length !=0) {
-        await db("se_project.stations").where("id", tostationid).update({
-          stationstatus: "new",
-          stationposition: "end",
-        });
+      } else if (fromStationRoutes.length !== 0 || toStationRoutes.length !== 0) {
+        await db("se_project.stations")
+          .where("id", fromstationid)
+          .update({
+            stationposition: "start",
+          });
+        await db("se_project.stations")
+          .where("id", tostationid)
+          .update({
+            stationposition: "end",
+          });
       }
-    }
-      await db("se_project.routes").where("id", routeId).del();
+  
       return res.status(200).json({ message: "Route deleted successfully" });
     } catch (err) {
       console.log("Error:", err);
@@ -792,10 +790,13 @@ catch(error) {
       const { reqStatus } = req.body;
       const { requestId } = req.params;
   
+      
       const [refundRequest] = await db("se_project.refund_requests")
         .where("id", requestId)
         .returning("*");
-  
+  if(refundRequest.status=="accepted"||refundRequest.status=="rejected"){
+    return res.status(400).send("already responsed for it");
+  }
       
   
       const [userId] = await db("se_project.refund_requests")
@@ -888,6 +889,7 @@ catch(error) {
    
         const {seniorStatus} = req.body;
         const {requestId} = req.params;
+      
         const {userid}=await db("se_project.senior_requests")
         .select("userid")
         .where("id", requestId).first();
@@ -899,6 +901,13 @@ catch(error) {
         .where("role", "=", "user")
         .first();
         const roleID = row2.id;
+        const [seniorRequest] = await db("se_project.senior_requests")
+        .where("id", requestId)
+        .returning("*");
+
+        if(seniorRequest.status=="accepted"||seniorRequest.status=="rejected"){
+        return res.status(400).send("already responsed for it");
+        }
         
         const updatedSenior = await db("se_project.senior_requests")
           .where("id", requestId)
