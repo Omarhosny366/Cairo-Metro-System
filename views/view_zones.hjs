@@ -19,9 +19,9 @@
           }
         })
         .then(data => {
-          // Handle the received zones data here
+          
           console.log(data);
-          // You can update your UI or perform any other actions with the data
+       
           const zonesTableBody = document.getElementById('zonesTableBody');
           data.forEach(zone => {
             const row = document.createElement('tr');
