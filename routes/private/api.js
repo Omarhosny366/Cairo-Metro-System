@@ -282,12 +282,30 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
         });
 
         return res.status(200).send("Ticket refund requested");
+      }else{
+        const onlineticket = await db("se_project.tickets")
+      .where("userid", ticket.userid)
+      .first();
+       if(onlineticket){
+      
+        await db("se_project.refund_requests").insert({
+          ticketid: ticketId,
+          status: "pending",
+          userid:ticket.userid,
+          refundamount:mount.amount
+          
+        });
+        return res.status(200).send("Ticket refund requested");
+       }
+
       }
     }else{
+      console.log(ticket.userid);
       const onlineticket = await db("se_project.tickets")
       .where("userid", ticket.userid)
       .first();
        if(onlineticket){
+      
         await db("se_project.refund_requests").insert({
           ticketid: ticketId,
           status: "pending",
@@ -476,6 +494,11 @@ try{
   
   if (!user) {
     return res.status(401).send("Invalid session");
+  }
+
+  const found = await db("se_project.senior_requests").where("userid",user.userid).first();
+  if(found){
+    return res.status(404).send("Request  is already pending");
   }
 
 
