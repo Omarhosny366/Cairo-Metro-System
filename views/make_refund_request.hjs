@@ -34,6 +34,7 @@
       <td>{{tripdate}}</td>
       <td>
         <button class="refundBtn" data-id="{{id}}">Request Refund</button>
+        <span class="refundSuccessMessage" style="display: none;">Ticket refunded</span>
       </td>
     </tr> 
     {{/tickets}}
@@ -42,35 +43,32 @@
 <script>
   $(document).ready(function() {
     $(".refundBtn").click(function() {
-      const ticketid = $(this).data('id');
+      const ticketId = $(this).data('id');
+      const row = $(this).closest('tr');
 
-      if (!ticketid) {
+      if (!ticketId) {
         alert('Ticket ID required');
         return;
       }
 
-          $.ajax({
-            type: "POST",
-            url: '/api/v1/refund/' + ticketId,
-            contentType: 'application/json',
-            success: function(serverResponse) {
-              if (serverResponse) {
-                alert('Ticket refunded');
-               
-              }
-            },
-            error: function(errorResponse) {
-              if (errorResponse) {
-                alert(`Ticket not refunded: ${errorResponse.responseText}`);
-              }
-            }
-          });
-        });
+      $.ajax({
+        type: "POST",
+        url: '/api/v1/refund/' + ticketId,
+        contentType: 'application/json',
+        success: function(serverResponse) {
+          if (serverResponse) {
+            row.find('.refundBtn').hide();
+            row.find('.refundSuccessMessage').show();
+          }
+        },
+        error: function(errorResponse) {
+          if (errorResponse) {
+            alert(`Ticket not refunded: ${errorResponse.responseText}`);
+          }
+        }
       });
-    </script>
-      </body>
-</html> 
-   
-
-
-
+    });
+  });
+</script>
+</body>
+</html>

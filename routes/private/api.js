@@ -229,6 +229,7 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
   const ticketId = req.params.ticketId;
 
   try {
+    
     // Retrieve the ticket from the database
     const ticket = await db("se_project.tickets")
       .where("id", ticketId)
@@ -237,6 +238,10 @@ app.post("/api/v1/refund/:ticketId", async function (req, res) {
     // Check if the ticket exists
     if (!ticket) {
       return res.status(404).send("Ticket not found");
+    }
+    const found = await db("se_project.refund_requests").where("ticketid", ticketId).where("status","pending").first();
+    if(found){
+      return res.status(404).send("Request refund is already pending");
     }
 
     const [mount] = await db("se_project.transactions")
